@@ -4,10 +4,8 @@
 
 'use strict'
 
-var mongoose = require('mongoose')
 
-
-var log
+var mongoose, log
 
 
 function connect(conf) {
@@ -71,8 +69,10 @@ function close() {
 }
 
 
-module.exports = function (_log) {
+module.exports = function (_mongoose, _log) {
     var nop = function () {}
+
+    mongoose = _mongoose
     log = _log || { info: nop, warning: nop, error: nop }
 
     return {
