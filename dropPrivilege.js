@@ -24,4 +24,7 @@ function dropPrivilege(runAs, log, exit) {
     }
 }
 
+
+module.exports = dropPrivilege
+
 // end of dropPrivilege.js
