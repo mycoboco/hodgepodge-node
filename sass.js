@@ -24,7 +24,8 @@ function serve(_pub, _log) {
         var name = path.basename(req.url, path.extname(req.url))
 
         sass.render({
-            file: path.join(pub, dir, name+'.scss')
+            file:        path.join(pub, dir, name+'.scss'),
+            outputStyle: 'compressed'
         }, function (err, result) {
             if (err) {
                 log.error(err)
