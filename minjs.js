@@ -21,9 +21,9 @@ function serve(_pub, _log) {
 
     return function (req, res, next) {
         var dir = path.dirname(req.url)
-        var name = path.basename(req.url, '.min.js')
+        var name = path.basename(req.url).substring(1)    // foo.js from _foo.js
 
-        minify(path.join(pub, dir, name+'.js'), function(err, result) {
+        minify(path.join(pub, dir, '+'+name), function(err, result) {
             if (err) {
                 log.error(err)
                 next()
@@ -40,7 +40,7 @@ function serve(_pub, _log) {
 
 
 function filter(req, res, next) {
-    if (/.+\.js$/.test(req.path) && !/.+\.min\.js$/.test(req.path)) {
+    if (/(?:.*\/|^)\+[^/]+\.js$/.test(req.path)) {    // blocks +foo.js
         res.sendStatus(404)
         return
     }

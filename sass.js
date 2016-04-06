@@ -22,9 +22,10 @@ function serve(_pub, _log) {
     return function (req, res, next) {
         var dir = path.dirname(req.url)
         var name = path.basename(req.url, path.extname(req.url))
+                       .substring(1)    // foo from _foo.css
 
         sass.render({
-            file:        path.join(pub, dir, name+'.scss'),
+            file:        path.join(pub, dir, '+'+name+'.scss'),
             outputStyle: 'compressed'
         }, function (err, result) {
             if (err) {
@@ -43,7 +44,7 @@ function serve(_pub, _log) {
 
 
 function filter(req, res, next) {
-    if (/.+\.scss$/.test(req.path)) {
+    if (/(?:.*\/|^)\+[^/]+\.scss$/.test(req.path)) {    // blocks +foo.scss
         res.sendStatus(404)
         return
     }
