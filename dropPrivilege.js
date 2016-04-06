@@ -20,7 +20,7 @@ function dropPrivilege(runAs, log, exit) {
             exit()
         }
     } else if (process.getuid() === 0 || process.getgid() === 0) {
-        log.warning('server sill run as root!')
+        log.warning('server will run as root!')
     }
 }
 
