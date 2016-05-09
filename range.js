@@ -31,8 +31,6 @@ function parse(r, stats) {
 
 
 function header(r, stats) {
-    if (!r) return null
-
     return 'bytes '+r.s+'-'+r.e+'/'+stats.size
 }
 
