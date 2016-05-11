@@ -5,8 +5,10 @@
 'use strict'
 
 
-function parse(r, stats) {
-    var range = function (r) {
+function parse(range, stats) {
+    var r
+
+    var parse = function (r) {
         r = /bytes=([0-9]+)-([0-9]+)?/.exec(r)
         if (!r) return null
 
@@ -18,11 +20,11 @@ function parse(r, stats) {
 
     if (!range) return null
 
-    r = range(r)
+    r = parse(range)
     if (r) {
         if (r.e !== r.e) r.e = stats.size-1
         if (r.s >= stats.size || r.e >= stats.size || r.s > r.e) {
-            return new Error('invalid range request: '+r)
+            return new Error('invalid range request: '+range)
         }
     }
 
