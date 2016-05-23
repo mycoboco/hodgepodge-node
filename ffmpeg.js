@@ -67,7 +67,7 @@ function probe(p, cb) {
             info.recordedAt = new Date(date[1])
         } else {
             creationTime = creationTime.exec(stderr)
-            if (creationTime) info.recordedAt = new Date(creatimTime[1])
+            if (creationTime) info.recordedAt = new Date(creationTime[1])
         }
 
         cb(null, info)
@@ -85,11 +85,9 @@ function probe(p, cb) {
 }
 
 
-module.exports = function () {
-    return {
-        init:  init,
-        probe: probe
-    }
+module.exports = {
+    init:  init,
+    probe: probe
 }
 
 // end of ffmpeg.js
