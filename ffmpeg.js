@@ -129,6 +129,7 @@ function constructOpts(_opt, accepts, cmds) {
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
     opts = opts.concat(cmds)
+    if (opt.bitrates.length === 2) opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
     if (opt.resolution) opts.push('-s', opt.res)
     if (opt.mute) opts.push('-an')
     else opts.push('-acodec', 'copy')
@@ -147,7 +148,27 @@ function copy(s, t, opt) {
         progress:    null
     })
 
-    return drive(s, t, constructOpts(opt, accepts, [ '-vcodec', 'copy' ]), opt.progress)
+    return drive(s, t, constructOpts(opt, accepts, [
+        '-vcodec', 'copy'
+    ]), opt.progress)
+}
+
+
+function compress(s, t, opt) {
+    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'bitrates' ]
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true,
+        trims:       [ -1, -1 ],
+        bitrates:    [ '4M', '6M' ],
+        progress:    null
+    })
+
+    return drive(s, t, constructOpts(opt, accepts, [
+        '-vcodec', 'libx264',
+        '-vprofile', 'high'
+    ]), opt.progress)
 }
 
 
