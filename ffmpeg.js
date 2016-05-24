@@ -102,6 +102,8 @@ function drive(s, t, opts, progress) {
                 reject(new Error('failed to process video with options: '+opts))
                 return
             }
+
+            resolve(t)
         }).on('error', function (err) {
             reject(err)
         })
