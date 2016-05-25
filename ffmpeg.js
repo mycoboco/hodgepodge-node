@@ -129,15 +129,15 @@ function constructOpts(_opt, accepts, cmds) {
         if (key !== 'progress' && log) log.warning('unsupported option: '+key)
     })
 
-    if (opt.trim && opt.trim[0] >= 0 && opt.trim[1] > 0) {
-        opts.push('-ss', opt.trim[0], '-to', opt.trim[1])
+    if (opt.trims && opt.trims[0] >= 0 && opt.trims[1] > 0) {
+        opts.push('-ss', opt.trims[0], '-to', opt.trims[1])
     }
     if (opt.resetRotate) opts.push('-metadata:s:v:0', 'rotate=0')
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
     opts = opts.concat(cmds)
     if (opt.bitrates.length === 2) opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
-    if (opt.resolution) opts.push('-s', opt.res)
+    if (opt.resolution) opts.push('-s', opt.resolution)
     if (opt.mute) opts.push('-an')
     else opts.push('-acodec', 'copy')
 
@@ -180,8 +180,10 @@ function compress(s, t, opt) {
 
 
 module.exports = {
-    init:  init,
-    probe: probe
+    init:     init,
+    probe:    probe,
+    compress: compress,
+    copy:     copy
 }
 
 // end of ffmpeg.js
