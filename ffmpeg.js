@@ -11,11 +11,12 @@ var spawn = require('child_process').spawn
 var defaults = require('defaults')
 
 
-var dir
+var dir, log
 
 
-function init(_dir) {
+function init(_dir, _log) {
     dir = _dir || '/usr/local/bin'
+    log = _log
 }
 
 
@@ -122,6 +123,10 @@ function constructOpts(_opt, accepts, cmds) {
 
     accepts.forEach(function (key) {
         if (typeof _opt[key] !== 'undefined') opt[key] = _opt[key]
+        delete _opt[key]
+    })
+    Object.keys(_opt).forEach(function (key) {
+        if (key !== 'progress' && log) log.warning('unsupported option: '+key)
     })
 
     if (opt.trim && opt.trim[0] >= 0 && opt.trim[1] > 0) {
