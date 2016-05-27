@@ -224,8 +224,6 @@ function compress(s, t, opt, progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(function (info) {
-                info = info[0]
-
                 return drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
                                                       info[0].duration, progress))
             })
