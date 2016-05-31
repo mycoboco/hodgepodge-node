@@ -148,6 +148,7 @@ function constructOpts(_opt, accepts, cmds) {
     if (opt.resetRotate) opts.push('-metadata:s:v:0', 'rotate=0')
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
+    // opt.playrate goes into cmds
     opts = opts.concat(cmds)
     if (opt.bitrates && opt.bitrates.length === 2) {
         opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
@@ -235,11 +236,48 @@ function compress(s, t, opt, progress) {
 }
 
 
+function playrate(s, t, opt, progress) {
+    var trims, opts
+    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'playrate' ]
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true,
+        trims:       [ -1, 1 ],
+        playrate:    4
+    })
+
+    if (opt.trims[0] >= 0) opt.trims[0] /= opt.playrate
+    if (opt.trims[1] > 0) opt.trims[1] /= opt.playrate
+    trims = opt.trims
+    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
+        '-vf', 'setpts='+(1/opt.playrate)+'*PTS'
+    ])
+
+    if (progress) {
+        return new Promise(function (resolve, reject) {
+            probe(s)
+            .then(function (info) {
+                return drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                                      info[0].duration, progress))
+            })
+            .catch(reject)
+        })
+    } else {
+        return drive(t, opts)
+    }
+}
+
+
 module.exports = {
     init:     init,
     probe:    probe,
     compress: compress,
-    copy:     copy
+    copy:     copy,
+    playrate: playrate
 }
 
 // end of ffmpeg.js
