@@ -154,6 +154,7 @@ function constructOpts(_opt, accepts, cmds) {
     if (opt.bitrates && opt.bitrates.length === 2) {
         opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
     }
+    if (opt.quality) opts.push('-q:v', ''+Math.max(2, Math.min(opt.quality, 31)))
     if (opt.resolution) opts.push('-s', opt.resolution)
     if (typeof opt.mute === 'boolean') {
         if (opt.mute) opts.push('-an')
@@ -353,7 +354,7 @@ function playrate(s, t, opt, progress) {
 
 function thumbnail(s, t, opt) {
     var opts
-    var accepts = [ 'resolution', 'trims' ]
+    var accepts = [ 'resolution', 'trims', 'quality' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -362,8 +363,7 @@ function thumbnail(s, t, opt) {
     })
 
     opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
-        '-vframes', '1',
-        '-q:v', '2'
+        '-vframes', '1'
     ]))
 
     return drive(t, opts)
