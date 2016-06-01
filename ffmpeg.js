@@ -315,7 +315,7 @@ function merge(ss, t, opt, progress) {
 
 
 function playrate(s, t, opt, progress) {
-    var trims, opts
+    var trims, playrate, opts
     var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'playrate' ]
 
     if (Array.isArray(s)) s = s[0]
@@ -328,8 +328,9 @@ function playrate(s, t, opt, progress) {
         playrate:    4
     })
 
-    if (opt.trims[0] >= 0) opt.trims[0] /= opt.playrate
-    if (opt.trims[1] > 0) opt.trims[1] /= opt.playrate
+    playrate = opt.playrate
+    if (opt.trims[0] >= 0) opt.trims[0] /= playrate
+    if (opt.trims[1] > 0) opt.trims[1] /= playrate
     trims = opt.trims
     opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
         '-vf', 'setpts='+(1/opt.playrate)+'*PTS'
@@ -340,7 +341,7 @@ function playrate(s, t, opt, progress) {
             probe(s)
             .then(function (info) {
                 drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                               info[0].duration, progress))
+                                               info[0].duration / playrate, progress))
                 .then(resolve)
                 .catch(reject)
             })
