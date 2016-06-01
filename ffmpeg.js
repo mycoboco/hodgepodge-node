@@ -4,6 +4,7 @@
 
 'use strict'
 
+var fs = require('fs')
 var os = require('os')
 var path = require('path')
 var spawn = require('child_process').spawn
@@ -12,6 +13,7 @@ var defaults = require('defaults')
 
 
 var dir, log
+var temps = []
 
 
 function init(_dir, _log) {
@@ -149,7 +151,7 @@ function constructOpts(_opt, accepts, cmds) {
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
     // opt.playrate goes into cmds
-    opts = opts.concat(cmds)
+    if (cmds) opts = opts.concat(cmds)
     if (opt.bitrates && opt.bitrates.length === 2) {
         opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
     }
@@ -236,6 +238,74 @@ function compress(s, t, opt, progress) {
 }
 
 
+function clean() {
+    temps.forEach(function (temp) {
+        fs.unlink(temp, function () {})
+    })
+}
+
+
+function merge(ss, t, opt, progress) {
+    var opts
+    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart' ]
+    var list = ''
+    var listFile = path.join(os.tmpdir(), process.pid+'-'+(Math.floor(Math.random()*1000000)))
+
+    temps.push(listFile)
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true
+    })
+
+    ss.forEach(function (s) {
+        list += 'file '+s+'\n'
+    })
+
+    return new Promise(function (resolve, reject) {
+        fs.writeFile(listFile, list, function (err) {
+            if (err) return Promise.reject(err)
+
+            opts = [
+                '-f', 'concat',
+                '-i', listFile
+            ].concat(constructOpts(opt, accepts))
+
+            if (progress) {
+                probe(ss)
+                .then(function (infos) {
+                    var duration = 0
+
+                    infos.forEach(function (info) {
+                        duration += info.duration
+                    })
+                    drive(t, opts, progressHandler(null, null, duration, progress))
+                    .then(function (t) {
+                        clean()
+                        resolve(t)
+                    })
+                    .catch(function (err) {
+                        clean()
+                        reject(err)
+                    })
+                })
+                .catch(reject)
+            } else {
+                drive(t, opts)
+                .then(function (t) {
+                    clean()
+                    resolve(t)
+                })
+                .catch(function (err) {
+                    clean()
+                    reject(err)
+                })
+            }
+        })
+    })
+}
+
+
 function playrate(s, t, opt, progress) {
     var trims, opts
     var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'playrate' ]
@@ -277,6 +347,7 @@ module.exports = {
     probe:    probe,
     compress: compress,
     copy:     copy,
+    merge:    merge,
     playrate: playrate
 }
 
