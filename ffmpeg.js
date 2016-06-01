@@ -155,8 +155,10 @@ function constructOpts(_opt, accepts, cmds) {
         opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
     }
     if (opt.resolution) opts.push('-s', opt.resolution)
-    if (opt.mute) opts.push('-an')
-    else opts.push('-acodec', 'copy')
+    if (typeof opt.mute === 'boolean') {
+        if (opt.mute) opts.push('-an')
+        else opts.push('-acodec', 'copy')
+    }
 
     return opts
 }
@@ -356,10 +358,7 @@ function thumbnail(s, t, opt) {
     if (Array.isArray(s)) s = s[0]
 
     opt = defaults(opt, {
-        mute:        false,
-        resetRotate: false,
-        fastStart:   false,
-        trims:       [ 0, -1 ],
+        trims: [ 0, -1 ],
     })
 
     opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
