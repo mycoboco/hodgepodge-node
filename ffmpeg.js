@@ -247,7 +247,7 @@ function clean() {
 
 function merge(ss, t, opt, progress) {
     var opts
-    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart' ]
+    var accepts = [ 'mute', 'resetRotate', 'fastStart' ]
     var list = ''
     var listFile = path.join(os.tmpdir(), process.pid+'-'+(Math.floor(Math.random()*1000000)))
 
@@ -268,8 +268,10 @@ function merge(ss, t, opt, progress) {
 
             opts = [
                 '-f', 'concat',
-                '-i', listFile
-            ].concat(constructOpts(opt, accepts))
+                '-i', listFile,
+            ].concat(constructOpts(opt, accepts, [
+                '-c', 'copy'
+            ]))
 
             if (progress) {
                 probe(ss)
