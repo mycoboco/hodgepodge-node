@@ -192,8 +192,10 @@ function copy(s, t, opt, progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(function (info) {
-                return drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                      info[0].duration, progress))
+                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                               info[0].duration, progress))
+                .then(resolve)
+                .catch(reject)
             })
             .catch(reject)
         })
@@ -227,8 +229,10 @@ function compress(s, t, opt, progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(function (info) {
-                return drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                      info[0].duration, progress))
+                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                               info[0].duration, progress))
+                .then(resolve)
+                .catch(reject)
             })
             .catch(reject)
         })
@@ -333,8 +337,10 @@ function playrate(s, t, opt, progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(function (info) {
-                return drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                      info[0].duration, progress))
+                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                               info[0].duration, progress))
+                .then(resolve)
+                .catch(reject)
             })
             .catch(reject)
         })
