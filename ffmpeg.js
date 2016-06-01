@@ -144,9 +144,8 @@ function constructOpts(_opt, accepts, cmds) {
         if (log) log.warning('unsupported option: '+key)
     })
 
-    if (opt.trims && opt.trims[0] >= 0 && opt.trims[1] > 0) {
-        opts.push('-ss', opt.trims[0], '-to', opt.trims[1])
-    }
+    if (opt.trims && opt.trims[0] >= 0) opts.push('-ss', opt.trims[0])
+    if (opt.trims && opt.trims[1] > 0) opts.push('-to', opt.trims[1])
     if (opt.resetRotate) opts.push('-metadata:s:v:0', 'rotate=0')
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
@@ -322,7 +321,7 @@ function playrate(s, t, opt, progress) {
         mute:        false,
         resetRotate: true,
         fastStart:   true,
-        trims:       [ -1, 1 ],
+        trims:       [ -1, -1 ],
         playrate:    4
     })
 
@@ -350,13 +349,36 @@ function playrate(s, t, opt, progress) {
 }
 
 
+function thumbnail(s, t, opt) {
+    var opts
+    var accepts = [ 'resolution', 'trims' ]
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: false,
+        fastStart:   false,
+        trims:       [ 0, -1 ],
+    })
+
+    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
+        '-vframes', '1',
+        '-q:v', '2'
+    ]))
+
+    return drive(t, opts)
+}
+
+
 module.exports = {
-    init:     init,
-    probe:    probe,
-    compress: compress,
-    copy:     copy,
-    merge:    merge,
-    playrate: playrate
+    init:      init,
+    probe:     probe,
+    compress:  compress,
+    copy:      copy,
+    merge:     merge,
+    playrate:  playrate,
+    thumbnail: thumbnail
 }
 
 // end of ffmpeg.js
