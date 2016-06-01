@@ -255,7 +255,7 @@ function playrate(s, t, opt, progress) {
     trims = opt.trims
     opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
         '-vf', 'setpts='+(1/opt.playrate)+'*PTS'
-    ])
+    ]))
 
     if (progress) {
         return new Promise(function (resolve, reject) {
