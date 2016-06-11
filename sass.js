@@ -36,7 +36,7 @@ function serve(_pub, _log) {
             res.header('Content-type', 'text/css')
                .send(result.css)
             fs.writeFile(path.join(pub, req.url), result.css, function (err) {
-                if (err) log.error(err)
+                err && log.error(err)
             })
         })
     }

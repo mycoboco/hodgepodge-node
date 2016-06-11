@@ -32,7 +32,7 @@ function serve(_pub, _log) {
             res.header('Content-type', 'text/javascript')
                .send(result)
             fs.writeFile(path.join(pub, req.url), result, function (err) {
-                if (err) log.error(err)
+                err && log.error(err)
             })
         })
     }

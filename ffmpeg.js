@@ -125,7 +125,7 @@ function drive(t, opts, progress) {
             var prog = /time=([0-9]+:[0-9]+:[0-9\.]+)/
 
             prog = prog.exec(data.toString())
-            if (prog) progress(secsFromString(prog[1]))
+            prog && progress(secsFromString(prog[1]))
         })
     })
 }
@@ -139,7 +139,7 @@ function constructOpts(_opt, accepts, cmds) {
         delete _opt[key]
     })
     Object.keys(_opt).forEach(function (key) {
-        if (log) log.warning('unsupported option: '+key)
+        log && log.warning('unsupported option: '+key)
     })
 
     if (opt.trims && opt.trims[0] >= 0 && opt.trims[1] > 0) {
