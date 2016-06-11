@@ -4,6 +4,7 @@
 
 'use strict'
 
+var fs = require('fs')
 var os = require('os')
 var path = require('path')
 var spawn = require('child_process').spawn
@@ -12,6 +13,7 @@ var defaults = require('defaults')
 
 
 var dir, log
+var temps = []
 
 
 function init(_dir, _log) {
@@ -142,19 +144,22 @@ function constructOpts(_opt, accepts, cmds) {
         log && log.warning('unsupported option: '+key)
     })
 
-    if (opt.trims && opt.trims[0] >= 0 && opt.trims[1] > 0) {
-        opts.push('-ss', opt.trims[0], '-to', opt.trims[1])
-    }
+    if (opt.trims && opt.trims[0] >= 0) opts.push('-ss', opt.trims[0])
+    if (opt.trims && opt.trims[1] > 0) opts.push('-to', opt.trims[1])
     if (opt.resetRotate) opts.push('-metadata:s:v:0', 'rotate=0')
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
-    opts = opts.concat(cmds)
+    // opt.playrate goes into cmds
+    if (cmds) opts = opts.concat(cmds)
     if (opt.bitrates && opt.bitrates.length === 2) {
         opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
     }
+    if (opt.quality) opts.push('-q:v', ''+Math.max(2, Math.min(opt.quality, 31)))
     if (opt.resolution) opts.push('-s', opt.resolution)
-    if (opt.mute) opts.push('-an')
-    else opts.push('-acodec', 'copy')
+    if (typeof opt.mute === 'boolean') {
+        if (opt.mute) opts.push('-an')
+        else opts.push('-acodec', 'copy')
+    }
 
     return opts
 }
@@ -189,8 +194,10 @@ function copy(s, t, opt, progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(function (info) {
-                return drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                      info[0].duration, progress))
+                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                               info[0].duration, progress))
+                .then(resolve)
+                .catch(reject)
             })
             .catch(reject)
         })
@@ -224,8 +231,10 @@ function compress(s, t, opt, progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(function (info) {
-                return drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                      info[0].duration, progress))
+                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                               info[0].duration, progress))
+                .then(resolve)
+                .catch(reject)
             })
             .catch(reject)
         })
@@ -235,11 +244,141 @@ function compress(s, t, opt, progress) {
 }
 
 
+function clean() {
+    temps.forEach(function (temp) {
+        fs.unlink(temp, function () {})
+    })
+}
+
+
+function merge(ss, t, opt, progress) {
+    var opts
+    var accepts = [ 'mute', 'resetRotate', 'fastStart' ]
+    var list = ''
+    var listFile = path.join(os.tmpdir(), process.pid+'-'+(Math.floor(Math.random()*1000000)))
+
+    temps.push(listFile)
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true
+    })
+
+    ss.forEach(function (s) {
+        list += 'file '+s+'\n'
+    })
+
+    return new Promise(function (resolve, reject) {
+        fs.writeFile(listFile, list, function (err) {
+            if (err) return Promise.reject(err)
+
+            opts = [
+                '-f', 'concat',
+                '-i', listFile,
+            ].concat(constructOpts(opt, accepts, [
+                '-c', 'copy'
+            ]))
+
+            if (progress) {
+                probe(ss)
+                .then(function (infos) {
+                    var duration = 0
+
+                    infos.forEach(function (info) {
+                        duration += info.duration
+                    })
+                    drive(t, opts, progressHandler(null, null, duration, progress))
+                    .then(function (t) {
+                        clean()
+                        resolve(t)
+                    })
+                    .catch(function (err) {
+                        clean()
+                        reject(err)
+                    })
+                })
+                .catch(reject)
+            } else {
+                drive(t, opts)
+                .then(function (t) {
+                    clean()
+                    resolve(t)
+                })
+                .catch(function (err) {
+                    clean()
+                    reject(err)
+                })
+            }
+        })
+    })
+}
+
+
+function playrate(s, t, opt, progress) {
+    var trims, playrate, opts
+    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'playrate' ]
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true,
+        trims:       [ -1, -1 ],
+        playrate:    4
+    })
+
+    playrate = opt.playrate
+    if (opt.trims[0] >= 0) opt.trims[0] /= playrate
+    if (opt.trims[1] > 0) opt.trims[1] /= playrate
+    trims = opt.trims
+    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
+        '-vf', 'setpts='+(1/opt.playrate)+'*PTS'
+    ]))
+
+    if (progress) {
+        return new Promise(function (resolve, reject) {
+            probe(s)
+            .then(function (info) {
+                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                               info[0].duration / playrate, progress))
+                .then(resolve)
+                .catch(reject)
+            })
+            .catch(reject)
+        })
+    } else {
+        return drive(t, opts)
+    }
+}
+
+
+function thumbnail(s, t, opt) {
+    var opts
+    var accepts = [ 'resolution', 'trims', 'quality' ]
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, {
+        trims: [ 0, -1 ],
+    })
+
+    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
+        '-vframes', '1'
+    ]))
+
+    return drive(t, opts)
+}
+
+
 module.exports = {
-    init:     init,
-    probe:    probe,
-    compress: compress,
-    copy:     copy
+    init:      init,
+    probe:     probe,
+    compress:  compress,
+    copy:      copy,
+    merge:     merge,
+    playrate:  playrate,
+    thumbnail: thumbnail
 }
 
 // end of ffmpeg.js
