@@ -113,7 +113,7 @@ function drive(t, opts, progress) {
     return new Promise(function (resolve, reject) {
         ffmpeg = spawn(path.join(dir, 'ffmpeg'), opts)
         ffmpeg.on('exit', function (code, signal) {
-            if (code === null || signal) {
+            if (code !== 0 || signal) {
                 reject(new Error('failed to process video with options: '+opts))
                 return
             }
