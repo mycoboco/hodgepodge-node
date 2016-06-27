@@ -35,6 +35,8 @@ function probe(ps) {
     ps = ps.map(function (p) {
         return new Promise(function (resolve, reject) {
             var ffprobe, opts = [
+                '-probesize', '2147483647',
+                '-analyzeduration', '2147483647',
                 '-select_streams', 'v',
                 '-show_streams',
                 p
@@ -108,6 +110,10 @@ function probe(ps) {
 function drive(t, opts, progress) {
     var ffmpeg
 
+    opts = [
+        '-probesize', '2147483647',
+        '-analyzeduration', '2147483647'
+    ].concat(opts)
     opts.push('-y', t)
 
     return new Promise(function (resolve, reject) {
