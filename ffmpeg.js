@@ -114,7 +114,7 @@ function drive(t, opts, progress) {
         '-probesize', '2147483647',
         '-analyzeduration', '2147483647'
     ].concat(opts)
-    opts.push('-y', t)
+    opts.push('-y', '--', t)
 
     return new Promise(function (resolve, reject) {
         ffmpeg = spawn(path.join(dir, 'ffmpeg'), opts)
