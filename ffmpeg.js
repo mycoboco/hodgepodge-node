@@ -139,7 +139,7 @@ function drive(t, opts, progress) {
 }
 
 
-function constructOpts(_opt, accepts, cmds) {
+function constructOpts(input, _opt, accepts, cmds) {
     var opt = {}, opts = []
 
     accepts.forEach(function (key) {
@@ -151,7 +151,10 @@ function constructOpts(_opt, accepts, cmds) {
     })
 
     if (opt.trims && opt.trims[0] >= 0) opts.push('-ss', opt.trims[0])
-    if (opt.trims && opt.trims[1] > 0) opts.push('-to', opt.trims[1])
+    opts = opts.concat(input)
+    if (opt.trims && opt.trims[1] > 0) {
+        opts.push('-t', (opt.trims[1]-opt.trims[0]) / (opt.playrate || 1))
+    }
     if (opt.resetRotate) opts.push('-metadata:s:v:0', 'rotate=0')
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
@@ -194,7 +197,7 @@ function copy(s, t, opt, progress) {
     })
 
     trims = opt.trims
-    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [ '-vcodec', 'copy' ]))
+    opts = constructOpts([ '-i', s ], opt, accepts, [ '-vcodec', 'copy' ])
 
     if (progress) {
         return new Promise(function (resolve, reject) {
@@ -228,10 +231,10 @@ function compress(s, t, opt, progress) {
     })
 
     trims = opt.trims
-    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
+    opts = constructOpts([ '-i', s ], opt, accepts, [
         '-vcodec', 'libx264',
         '-vprofile', 'high'
-    ]))
+    ])
 
     if (progress) {
         return new Promise(function (resolve, reject) {
@@ -278,12 +281,10 @@ function merge(ss, t, opt, progress) {
         fs.writeFile(listFile, list, function (err) {
             if (err) return Promise.reject(err)
 
-            opts = [
+            opts = constructOpts([
                 '-f', 'concat',
                 '-i', listFile,
-            ].concat(constructOpts(opt, accepts, [
-                '-c', 'copy'
-            ]))
+            ], opt, accepts, [ '-c', 'copy' ])
 
             if (progress) {
                 probe(ss)
@@ -335,18 +336,15 @@ function playrate(s, t, opt, progress) {
     })
 
     playrate = opt.playrate
-    if (opt.trims[0] >= 0) opt.trims[0] /= playrate
-    if (opt.trims[1] > 0) opt.trims[1] /= playrate
     trims = opt.trims
-    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
-        '-vf', 'setpts='+(1/opt.playrate)+'*PTS'
-    ]))
+    opts = constructOpts([ '-i', s ], opt, accepts, [ '-vf', 'setpts='+(1/opt.playrate)+'*PTS' ])
 
     if (progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(function (info) {
-                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                drive(t, opts, progressHandler((trims && trims[0]) / playrate,
+                                               (trims && trims[1]) / playrate,
                                                info[0].duration / playrate, progress))
                 .then(resolve)
                 .catch(reject)
@@ -369,9 +367,7 @@ function thumbnail(s, t, opt) {
         trims: [ 0, -1 ],
     })
 
-    opts = [ '-i', s ].concat(constructOpts(opt, accepts, [
-        '-vframes', '1'
-    ]))
+    opts = constructOpts([ '-i', s ], opt, accepts, [ '-vframes', '1' ])
 
     return drive(t, opts)
 }
