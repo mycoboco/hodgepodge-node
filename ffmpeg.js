@@ -9,6 +9,7 @@ var os = require('os')
 var path = require('path')
 var spawn = require('child_process').spawn
 
+var async = require('async')
 var defaults = require('defaults')
 
 
@@ -358,18 +359,41 @@ function playrate(s, t, opt, progress) {
 
 
 function thumbnail(s, t, opt) {
-    var opts
     var accepts = [ 'resolution', 'trims', 'quality' ]
+    var funcs = []
 
     if (Array.isArray(s)) s = s[0]
 
     opt = defaults(opt, {
-        trims: [ 0, -1 ],
+        thumbnails: [ 0 ],
     })
 
-    opts = constructOpts([ '-i', s ], opt, accepts, [ '-vframes', '1' ])
+    for (var i = 0; i < opt.thumbnails.length; i++) {
+        !function (i) {
+            var _opt = Object.assign({}, opt)
 
-    return drive(t, opts)
+            _opt.trims = [ _opt.thumbnails[i], -1 ]
+            delete _opt.thumbnails
+
+            funcs.push(function (callback) {
+                var opts = constructOpts([ '-i', s ], _opt, accepts, [ '-vframes', '1' ])
+                var dir = path.dirname(t),
+                    ext = path.extname(t),
+                    base = path.basename(t, ext)
+
+                drive(path.join(dir, base+'-'+i+ext), opts)
+                .then(function (t) { callback(null, t) })
+                .catch(callback)
+            })
+        }(i)
+    }
+
+    return new Promise(function (resolve, reject) {
+        async.parallelLimit(funcs, 5, function (err, results) {
+            if (err) reject(err)
+            else resolve(results)
+        })
+    })
 }
 
 
