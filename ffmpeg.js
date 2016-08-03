@@ -362,11 +362,24 @@ function thumbnail(s, t, opt) {
     var accepts = [ 'resolution', 'trims', 'quality' ]
     var funcs = []
 
+    var tname = function (t) {
+        var dir = path.dirname(t),
+            ext = path.extname(t),
+            base = path.basename(t, ext)
+
+        return path.join(dir, base+'-'+i+ext)
+    }
+
     if (Array.isArray(s)) s = s[0]
 
     opt = defaults(opt, {
         thumbnails: [ 0 ],
     })
+
+    if (typeof opt.thumbnails === 'number') {
+        opt.thumbnails = [ opt.thumbnails ]
+        tname = function (t) { return t }
+    }
 
     for (var i = 0; i < opt.thumbnails.length; i++) {
         !function (i) {
@@ -377,11 +390,8 @@ function thumbnail(s, t, opt) {
 
             funcs.push(function (callback) {
                 var opts = constructOpts([ '-i', s ], _opt, accepts, [ '-vframes', '1' ])
-                var dir = path.dirname(t),
-                    ext = path.extname(t),
-                    base = path.basename(t, ext)
 
-                drive(path.join(dir, base+'-'+i+ext), opts)
+                drive(tname(t), opts)
                 .then(function (t) { callback(null, t) })
                 .catch(callback)
             })
