@@ -362,7 +362,7 @@ function thumbnail(s, t, opt) {
     var accepts = [ 'resolution', 'trims', 'quality' ]
     var funcs = []
 
-    var tname = function (t) {
+    var tname = function (t, i) {
         var dir = path.dirname(t),
             ext = path.extname(t),
             base = path.basename(t, ext)
@@ -391,7 +391,7 @@ function thumbnail(s, t, opt) {
             funcs.push(function (callback) {
                 var opts = constructOpts([ '-i', s ], _opt, accepts, [ '-vframes', '1' ])
 
-                drive(tname(t), opts)
+                drive(tname(t, i), opts)
                 .then(function (t) { callback(null, t) })
                 .catch(callback)
             })
