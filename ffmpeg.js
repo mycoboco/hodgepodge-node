@@ -15,6 +15,7 @@ var defaults = require('defaults')
 
 var dir, log
 var temps = []
+var ncpu = os.cpus().length
 
 
 function init(_dir, _log) {
@@ -399,7 +400,7 @@ function thumbnail(s, t, opt) {
     }
 
     return new Promise(function (resolve, reject) {
-        async.parallelLimit(funcs, 5, function (err, results) {
+        async.parallelLimit(funcs, ncpu, function (err, results) {
             if (err) reject(err)
             else resolve(results)
         })
