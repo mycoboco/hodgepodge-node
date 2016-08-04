@@ -385,7 +385,7 @@ function thumbnail(s, t, opt) {
         !function (i) {
             var _opt = Object.assign({}, opt)
 
-            _opt.trims = [ _opt.thumbnails[i], -1 ]
+            _opt.trims = [ Math.floor(_opt.thumbnails[i]), -1 ]
             delete _opt.thumbnails
 
             funcs.push(function (callback) {
