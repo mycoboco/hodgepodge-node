@@ -28,7 +28,7 @@ function connect(conf, cb) {
 
     log.info('connecting to redis('+conf.host+':'+conf.port+')')
     client = redis.createClient(conf.port, conf.host)
-    client.on(function (err) {
+    client.on('error', function (err) {
         log.error(err)
     })
     if (conf.auth) {
