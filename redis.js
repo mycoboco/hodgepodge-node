@@ -28,6 +28,9 @@ function connect(conf, cb) {
 
     log.info('connecting to redis('+conf.host+':'+conf.port+')')
     client = redis.createClient(conf.port, conf.host)
+    client.on(function (err) {
+        log.error(err)
+    })
     if (conf.auth) {
         log.info('logging into redis with authorization')
         client.auth(conf.auth, selectDb)
