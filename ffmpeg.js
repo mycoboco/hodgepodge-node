@@ -264,7 +264,7 @@ function clean() {
 
 function merge(ss, t, opt, progress) {
     var opts
-    var accepts = [ 'mute', 'resetRotate', 'fastStart' ]
+    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'unsafe' ]
     var list = ''
     var listFile = path.join(os.tmpdir(), process.pid+'-'+(Math.floor(Math.random()*1000000)))
 
@@ -272,7 +272,8 @@ function merge(ss, t, opt, progress) {
     opt = defaults(opt, {
         mute:        false,
         resetRotate: true,
-        fastStart:   true
+        fastStart:   true,
+        unsafe:      false
     })
 
     ss.forEach(function (s) {
@@ -284,8 +285,9 @@ function merge(ss, t, opt, progress) {
             if (err) return Promise.reject(err)
 
             opts = constructOpts([
-                '-f', 'concat',
-                '-i', listFile,
+                '-f',    'concat',
+                '-safe', (opt.unsafe)? 0: 1,
+                '-i',    listFile
             ], opt, accepts, [ '-c', 'copy' ])
 
             if (progress) {
