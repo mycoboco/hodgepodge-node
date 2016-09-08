@@ -327,12 +327,11 @@ function merge(ss, t, opt, progress) {
 
 function playrate(s, t, opt, progress) {
     var trims, playrate, opts
-    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'playrate' ]
+    var accepts = [ 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'playrate' ]
 
     if (Array.isArray(s)) s = s[0]
 
     opt = defaults(opt, {
-        mute:        false,
         resetRotate: true,
         fastStart:   true,
         trims:       [ -1, -1 ],
@@ -341,7 +340,8 @@ function playrate(s, t, opt, progress) {
 
     playrate = opt.playrate
     trims = opt.trims
-    opts = constructOpts([ '-i', s ], opt, accepts, [ '-vf', 'setpts='+(1/opt.playrate)+'*PTS' ])
+    opts = constructOpts([ '-i', s ], opt, accepts,
+                         [ '-vf', 'setpts='+(1/opt.playrate)+'*PTS', '-an' ])
 
     if (progress) {
         return new Promise(function (resolve, reject) {
