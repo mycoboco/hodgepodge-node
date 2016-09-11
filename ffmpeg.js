@@ -410,6 +410,63 @@ function thumbnail(s, t, opt) {
 }
 
 
+function watermark(s, o, t, opt, progress) {
+    var trims, opts, overlay
+    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims', 'position', 'margin' ]
+
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true,
+        position:    'left top',
+        margins:     [ 0, 0 ]
+    })
+
+    switch(opt.position) {
+        case 'left top':
+        case 'top left':
+        default:    // considered 'left top'
+            overlay = 'overlay='+opt.margin[0]+':'+opt.margin[1]
+            break
+        case 'right top':
+        case 'top right':
+            overlay = 'overlay=W-w-'+opt.margin[0]+':'+opt.margin[1]
+            break
+        case 'left bottom':
+        case 'bottom left':
+            overlay = 'overlay='+opt.margin[0]+':H-h-'+opt.margin[1]
+            break
+        case 'right bottom':
+        case 'bottom right':
+            overlay = 'overlay=W-w-'+opt.margin[0]+':H-h-'+opt.margin[1]
+            break
+        case 'center':    // no margin support
+            overlay = 'overlay=(W-w)/2:(H-h)/2'
+            break
+    }
+
+    trims = opt.trims
+    opts = constructOpts([ '-i', s, '-i', o ], opt, accepts, [
+        '-filter_complex', overlay
+    ])
+
+    if (progress) {
+        return new Promise(function (resolve, reject) {
+            probe(s)
+            .then(function (info) {
+                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
+                                               info[0].duration, progress))
+                .then(resolve)
+                .catch(reject)
+            })
+            .catch(reject)
+        })
+    } else {
+        return drive(t, opts)
+    }
+}
+
+
 module.exports = {
     init:      init,
     probe:     probe,
@@ -417,7 +474,8 @@ module.exports = {
     copy:      copy,
     merge:     merge,
     playrate:  playrate,
-    thumbnail: thumbnail
+    thumbnail: thumbnail,
+    watermark: watermark
 }
 
 // end of ffmpeg.js
