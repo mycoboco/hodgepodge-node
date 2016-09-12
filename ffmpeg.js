@@ -412,7 +412,7 @@ function thumbnail(s, t, opt) {
 
 function watermark(s, o, t, opt, progress) {
     var trims, opts, overlay
-    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims', 'position', 'margin' ]
+    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims', 'position', 'margins' ]
 
     opt = defaults(opt, {
         mute:        false,
@@ -426,21 +426,21 @@ function watermark(s, o, t, opt, progress) {
         case 'left top':
         case 'top left':
         default:    // considered 'left top'
-            overlay = 'overlay='+opt.margin[0]+':'+opt.margin[1]
+            overlay = 'overlay='+opt.margins[0]+':'+opt.margins[1]
             break
         case 'right top':
         case 'top right':
-            overlay = 'overlay=W-w-'+opt.margin[0]+':'+opt.margin[1]
+            overlay = 'overlay=W-w-'+opt.margins[0]+':'+opt.margins[1]
             break
         case 'left bottom':
         case 'bottom left':
-            overlay = 'overlay='+opt.margin[0]+':H-h-'+opt.margin[1]
+            overlay = 'overlay='+opt.margins[0]+':H-h-'+opt.margins[1]
             break
         case 'right bottom':
         case 'bottom right':
-            overlay = 'overlay=W-w-'+opt.margin[0]+':H-h-'+opt.margin[1]
+            overlay = 'overlay=W-w-'+opt.margins[0]+':H-h-'+opt.margins[1]
             break
-        case 'center':    // no margin support
+        case 'center':    // no margins support
             overlay = 'overlay=(W-w)/2:(H-h)/2'
             break
     }
