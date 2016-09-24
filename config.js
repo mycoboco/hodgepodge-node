@@ -13,7 +13,8 @@ module.exports = function (p, _conf) {
     var config = konfig(p)
 
     Object.keys(_conf).forEach(function (p) {
-        var key = path.basename(p)
+        var sep = p.indexOf(':')
+        var key = (sep >= 0)? p.substring(sep+1): p
 
         conf[key] = defaults(config(p), _conf[p])
     })
