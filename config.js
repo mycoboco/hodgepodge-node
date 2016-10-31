@@ -16,7 +16,7 @@ module.exports = function (p, _conf) {
         var sep = p.indexOf(':')
         var key = (sep >= 0)? p.substring(sep+1): p
 
-        conf[key] = defaults(config(p), _conf[p])
+        conf[key] = defaults(config(path.join(p.substring(0, sep), key)), _conf[p])
     })
 
     return conf
