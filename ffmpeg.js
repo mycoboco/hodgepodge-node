@@ -90,7 +90,7 @@ function probe(ps) {
                     if (creationTime) info.recordedAt = new Date(creationTime[1]+'Z')
                 }
 
-                if (isFinite(info.nframe)) {    // nframe required
+                if (!isFinite(info.nframe)) {    // nframe required
                     execf(path.join(dir, 'ffmpeg'), [
                         '-nostats',
                         '-i', p,
