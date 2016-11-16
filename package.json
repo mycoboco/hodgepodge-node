@@ -20,6 +20,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "async": "^2.1.2",
     "colors": "^1.1.2",
     "defaults": "^1.0.2",
     "konphyg": "^1.4.0",

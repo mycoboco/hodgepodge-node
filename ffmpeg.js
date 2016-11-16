@@ -384,28 +384,39 @@ function thumbnail(s, t, opt) {
         tname = function (t) { return t }
     }
 
-    for (var i = 0; i < opt.thumbnails.length; i++) {
-        !function (i) {
-            var _opt = Object.assign({}, opt)
-
-            _opt.trims = [ Math.floor(_opt.thumbnails[i]), -1 ]
-            delete _opt.thumbnails
-
-            funcs.push(function (callback) {
-                var opts = constructOpts([ '-i', s ], _opt, accepts, [ '-vframes', '1' ])
-
-                drive(tname(t, i), opts)
-                .then(function (t) { callback(null, t) })
-                .catch(callback)
-            })
-        }(i)
-    }
-
     return new Promise(function (resolve, reject) {
-        async.parallelLimit(funcs, ncpu, function (err, results) {
-            if (err) reject(err)
-            else resolve(results)
+        probe(s)
+        .then(function (info) {
+            for (var i = 0; i < opt.thumbnails.length; i++) {
+                !function (i) {
+                    var _opt = Object.assign({}, opt), opts
+
+                    if (_opt.thumbnails[i] >= info[0].duration ||
+                        Math.abs(info[0].duration - _opt.thumbnails[i]) < 1) {
+                        delete _opt.thumbnails
+                        opts = constructOpts([ '-i', s ], _opt, accepts,
+                                             [ '-vf', 'select=\'eq(n,'+(info[0].nframe-1)+')\'',
+                                               '-vframes', '1' ])
+                    } else {
+                        _opt.trims = [ Math.floor(_opt.thumbnails[i]), -1 ]
+                        delete _opt.thumbnails
+                        opts = constructOpts([ '-i', s ], _opt, accepts, [ '-vframes', '1' ])
+                    }
+
+                    funcs.push(function (callback) {
+                        drive(tname(t, i), opts)
+                        .then(function (t) { callback(null, t) })
+                        .catch(callback)
+                    })
+                }(i)
+            }
+
+            async.parallelLimit(funcs, ncpu, function (err, results) {
+                if (err) reject(err)
+                else resolve(results)
+            })
         })
+        .catch(reject)
     })
 }
 
