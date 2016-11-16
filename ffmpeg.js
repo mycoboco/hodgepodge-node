@@ -8,6 +8,7 @@ var fs = require('fs')
 var os = require('os')
 var path = require('path')
 var spawn = require('child_process').spawn
+var execf = require('child_process').execFile
 
 var async = require('async')
 var defaults = require('defaults')
@@ -36,17 +37,16 @@ function probe(ps) {
 
     ps = ps.map(function (p) {
         return new Promise(function (resolve, reject) {
-            var ffprobe, opts = [
+            var opts = [
                 '-probesize', '2147483647',
                 '-analyzeduration', '2147483647',
                 '-select_streams', 'v',
                 '-show_streams',
                 p
             ]
-            var stdout = '', stderr = '', info = {}
+            var info = {}
 
-            ffprobe = spawn(path.join(dir, 'ffprobe'), opts)
-            ffprobe.on('exit', function (code, signal) {
+            execf(path.join(dir, 'ffprobe'), opts, function (err, stdout, stderr) {
                 var nframe = /nb_frames=([0-9]+)/,
                     width = /[^_]width=([0-9]+)/,
                     height = /[^_]height=([0-9]+)/,
@@ -57,8 +57,8 @@ function probe(ps) {
                     date = /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+\d+))/,
                     creationTime = /creation_time\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2})/
 
-                if (code === null || signal) {
-                    reject(new Error('failed to probe: '+p))
+                if (err) {
+                    reject(err)
                     return
                 }
 
@@ -90,17 +90,28 @@ function probe(ps) {
                     if (creationTime) info.recordedAt = new Date(creationTime[1]+'Z')
                 }
 
-                resolve(info)
-            }).on('error', function (err) {
-                reject(err)
-            })
+                if (isFinite(info.nframe)) {    // nframe required
+                    execf(path.join(dir, 'ffmpeg'), [
+                        '-nostats',
+                        '-i', p,
+                        '-vcodec', 'copy',
+                        '-f', 'rawvideo',
+                        '-y', '/dev/null'
+                    ], function (err, stdout, stderr) {
+                        var nframe = /frame=\s*([0-9]+)/
 
-            ffprobe.stdout.on('data', function (data) {
-                stdout += data.toString()
-            })
+                        if (err) {
+                            reject(err)
+                            return
+                        }
 
-            ffprobe.stderr.on('data', function (data) {
-                stderr += data.toString()
+                        nframe = nframe.exec(stderr)
+                        if (nframe) info.nframe = +nframe[1]
+                        resolve(info)
+                    })
+                } else {
+                    resolve(info)
+                }
             })
         })
     })
