@@ -10,7 +10,7 @@ var colors = require('colors')
 
 
 // extends Object to trace call stacks
-Object.defineProperty(global, '__stack', {
+!__stack && Object.defineProperty(global, '__stack', {
     get: function() {
         var orig = Error.prepareStackTrace
         var err = new Error
@@ -28,7 +28,7 @@ Object.defineProperty(global, '__stack', {
 
 
 // extends Object to get line number
-Object.defineProperty(global, '__line', {
+!__line && Object.defineProperty(global, '__line', {
     get: function() {
         return __stack[2].getLineNumber()
     }
@@ -36,7 +36,7 @@ Object.defineProperty(global, '__line', {
 
 
 // extends Object to get function name
-Object.defineProperty(global, '__function', {
+!__function && Object.defineProperty(global, '__function', {
     get: function() {
         return __stack[2].getFunctionName()
     }
