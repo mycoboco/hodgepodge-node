@@ -10,7 +10,7 @@ var colors = require('colors')
 
 
 // adds global property to trace call stacks
-!__stack && Object.defineProperty(global, '__stack', {
+!global.hasOwnProperty('__stack') && Object.defineProperty(global, '__stack', {
     get: function() {
         var orig = Error.prepareStackTrace
         var err = new Error
@@ -28,7 +28,7 @@ var colors = require('colors')
 
 
 // adds global property to get line number
-!__line && Object.defineProperty(global, '__line', {
+!global.hasOwnProperty('__line') && Object.defineProperty(global, '__line', {
     get: function() {
         return __stack[2].getLineNumber()
     }
@@ -36,7 +36,7 @@ var colors = require('colors')
 
 
 // adds global property to get function name
-!__function && Object.defineProperty(global, '__function', {
+!global.hasOwnProperty('__function') && Object.defineProperty(global, '__function', {
     get: function() {
         return __stack[2].getFunctionName()
     }
