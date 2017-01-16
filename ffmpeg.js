@@ -130,7 +130,10 @@ function drive(t, opts, progress) {
     opts.push('-y', '--', t)
 
     return new Promise(function (resolve, reject) {
-        ffmpeg = spawn(path.join(dir, 'ffmpeg'), opts)
+        ffmpeg = spawn(path.join(dir, 'ffmpeg'), opts, {
+            stdio: (progress)? [ 'ignore', 'ignore', 'pipe' ]:
+                               'ignore'    // to avoid hanging
+        })
         ffmpeg.on('exit', function (code, signal) {
             if (code !== 0 || signal) {
                 reject(new Error('failed to process video with options: '+opts))
