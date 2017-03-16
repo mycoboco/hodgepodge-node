@@ -444,7 +444,7 @@ function preview(s, t, opt) {
     opt = defaults(opt, { trims: [ -1, -1 ] })
 
     height = opt.height || 120
-    number = opt.number || 10
+    number = opt.number || 100
     delete opt.height
     delete opt.number
 
