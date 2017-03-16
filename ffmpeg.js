@@ -435,6 +435,37 @@ function thumbnail(s, t, opt) {
 }
 
 
+function preview(s, t, opt) {
+    var height, number, opts
+    var accepts = [ 'quality' ]
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, { trims: [ -1, -1 ] })
+
+    height = opt.height || 120
+    number = opt.number || 10
+    delete opt.height
+    delete opt.number
+
+    return new Promise(function (resolve, reject) {
+        probe(s)
+        .then(function (info) {
+            var f = Math.floor(info[0].nframe / number)
+            opts = constructOpts([ '-i', s ], opt, accepts,
+                                 [ '-frames', '1',
+                                   '-vf', 'select=not(mod(n\\,'+f+')),scale=-1:'+height+','+
+                                       'tile='+number+'x1' ])
+
+            drive(t, opts)
+            .then(resolve)
+            .catch(reject)
+        })
+        .catch(reject)
+    })
+}
+
+
 function watermark(s, o, t, opt, progress) {
     var trims, opts, overlay
     var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims', 'position', 'margins' ]
@@ -500,6 +531,7 @@ module.exports = {
     merge:     merge,
     playrate:  playrate,
     thumbnail: thumbnail,
+    preview:   preview,
     watermark: watermark
 }
 
