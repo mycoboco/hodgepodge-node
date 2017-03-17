@@ -452,6 +452,8 @@ function preview(s, t, opt) {
         probe(s)
         .then(function (info) {
             var f = Math.floor(info[0].nframe / number)
+
+            if (f === 0) f = 1, number = info[0].nframe
             opts = constructOpts([ '-i', s ], opt, accepts,
                                  [ '-frames', '1',
                                    '-vf', 'select=not(mod(n\\,'+f+')),scale=-1:'+height+','+
