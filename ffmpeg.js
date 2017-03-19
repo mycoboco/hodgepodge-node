@@ -32,6 +32,39 @@ function secsFromString(s) {
 }
 
 
+function frame(p, trims, cb) {
+    var opts
+
+    if (typeof trims === 'function') {
+        cb = trims
+        trims = null
+    }
+
+    opts = [ '-nostats' ]
+    if (trims && trims[0] >= 0) opts = opts.concat([ '-ss', trims[0] ])
+    opts = opts.concat([ '-i', p ])
+    if (trims && trims[1] > 0) opts = opts.concat([ '-t', trims[1]-trims[0] ])
+    opts = opts.concat([
+        '-vcodec', 'copy',
+        '-f', 'rawvideo',
+        '-y', '/dev/null'
+    ])
+
+    execf(path.join(dir, 'ffmpeg'), opts, function (err, stdout, stderr) {
+        var nframe = /frame=\s*([0-9]+)/
+
+        if (err) {
+            cb(err)
+            return
+        }
+
+        nframe = nframe.exec(stderr)
+        if (nframe) nframe = +nframe[1]
+        cb(null, nframe)
+    })
+}
+
+
 function probe(ps) {
     ps = (Array.isArray(ps))? ps: [ ps ]
 
@@ -91,22 +124,13 @@ function probe(ps) {
                 }
 
                 if (!isFinite(info.nframe)) {    // nframe required
-                    execf(path.join(dir, 'ffmpeg'), [
-                        '-nostats',
-                        '-i', p,
-                        '-vcodec', 'copy',
-                        '-f', 'rawvideo',
-                        '-y', '/dev/null'
-                    ], function (err, stdout, stderr) {
-                        var nframe = /frame=\s*([0-9]+)/
-
+                    frame(p, function (err, f) {
                         if (err) {
                             reject(err)
                             return
                         }
 
-                        nframe = nframe.exec(stderr)
-                        if (nframe) info.nframe = +nframe[1]
+                        info.nframe = f
                         resolve(info)
                     })
                 } else {
@@ -437,7 +461,7 @@ function thumbnail(s, t, opt) {
 
 function preview(s, t, opt) {
     var height, number, opts
-    var accepts = [ 'quality' ]
+    var accepts = [ 'trims', 'quality' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -449,19 +473,33 @@ function preview(s, t, opt) {
     delete opt.number
 
     return new Promise(function (resolve, reject) {
-        probe(s)
-        .then(function (info) {
-            var f = Math.floor(info[0].nframe / number)
+        var perform = function (nframe) {
+            var f = Math.floor(nframe / number)
 
-            if (f === 0) f = 1, number = info[0].nframe
+            if (f === 0) f = 1, number = nframe
             opts = constructOpts([ '-i', s ], opt, accepts,
                                  [ '-frames', '1',
                                    '-vf', 'select=not(mod(n\\,'+f+')),scale=-1:'+height+','+
-                                       'tile='+number+'x1' ])
-
+                                              'tile='+number+'x1' ])
             drive(t, opts)
             .then(resolve)
             .catch(reject)
+        }
+
+        probe(s)
+        .then(function (info) {
+            if (opt.trims[0] >= 0 || opt.trims[1] > 0) {
+                frame(s, opt.trims, function (err, f) {
+                    if (err) {
+                        reject(err)
+                        return
+                    }
+
+                    perform(f)
+                })
+            } else {
+                perform(info[0].nframe)
+            }
         })
         .catch(reject)
     })
