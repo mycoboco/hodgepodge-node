@@ -648,13 +648,6 @@ function vidstab(s, t, opt, progress) {
 }
 
 
-init('/usr/bin')
-preview('/home/mycoboco/test.mp4', '/home/mycoboco/output.jpg', {
-    height: 480,
-    fps: 5
-})
-
-
 module.exports = {
     init:      init,
     probe:     probe,
