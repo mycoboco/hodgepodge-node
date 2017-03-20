@@ -574,7 +574,7 @@ function watermark(s, o, t, opt, progress) {
 
 
 function vidstab(s, t, opt, progress) {
-    var trims, detect, transform, opts
+    var trims, detect, transform, unsharp, opts
     var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'bitrates' ]
 
     var opt2str = function (opt) {
@@ -595,7 +595,7 @@ function vidstab(s, t, opt, progress) {
             _opts = _opts.concat([ '-i', s ])
             if (trims && trims[1] > 0) _opts = _opts.concat([ '-t', trims[1]-trims[0] ])
             _opts = _opts.concat([
-                '-vf', 'vidstabdetect'+opt2str(detect),
+                '-vf', 'vidstabdetect'+opt2str(detect)+',unsharp='+(unsharp || '5:5:0.8:3:3:0.4'),
                 '-f', 'null',
             ])
 
@@ -624,8 +624,10 @@ function vidstab(s, t, opt, progress) {
 
     detect = opt.detect
     transform = opt.transform
+    unsharp = opt.unsharp
     delete opt.detect
     delete opt.transform
+    delete opt.unsharp
 
     trims = opt.trims
     opts = constructOpts([ '-i', s ], opt, accepts, [
