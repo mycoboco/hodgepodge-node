@@ -460,7 +460,7 @@ function thumbnail(s, t, opt) {
 
 
 function preview(s, t, opt) {
-    var height, number, opts
+    var height, number, fps, opts
     var accepts = [ 'trims', 'quality' ]
 
     if (Array.isArray(s)) s = s[0]
@@ -468,28 +468,41 @@ function preview(s, t, opt) {
     opt = defaults(opt, { trims: [ -1, -1 ] })
 
     height = opt.height || 120
-    number = opt.number || 100
+    if (typeof opt.fps === 'number') fps = opt.fps
+    else number = opt.number || 100
     delete opt.height
     delete opt.number
+    delete opt.fps
 
     return new Promise(function (resolve, reject) {
-        var perform = function (nframe) {
-            var f = Math.floor(nframe / number)
-
-            if (f === 0) f = 1, number = nframe
-            opts = constructOpts([ '-i', s ], opt, accepts,
-                                 [ '-frames', '1',
-                                   '-vf', 'select=not(mod(n\\,'+f+')),scale=-1:'+height+','+
-                                              'tile='+number+'x1' ])
-            drive(t, opts)
-            .then(resolve)
-            .catch(reject)
-        }
-
         probe(s)
         .then(function (info) {
-            if (opt.trims[0] >= 0 || opt.trims[1] > 0) {
-                frame(s, opt.trims, function (err, f) {
+            var perform = function (nframe) {
+                if (typeof number === 'number') {
+                    fps = Math.floor(nframe / number)
+                    if (fps === 0) fps = 1, number = nframe
+                    opts = constructOpts([ '-i', s ], opt, accepts,
+                                         [ '-frames', '1',
+                                           '-vf', 'select=not(mod(n\\,'+fps+')),scale=-1:'+height+
+                                                      ',tile='+number+'x1' ])
+                } else {
+                    number = Math.max(1,
+                                      Math.floor(((opt.trims[1] > 0)?
+                                                     Math.min(opt.trims[1], info[0].duration):
+                                                     info[0].duration) / fps))
+                    opts = constructOpts([ '-i', s ], opt, accepts,
+                                         [ '-frames', '1',
+                                           '-vf', 'fps=1/'+fps+',scale=-1:'+height+',tile='+number+
+                                                      'x1' ])
+                }
+
+                drive(t, opts)
+                .then(resolve)
+                .catch(reject)
+            }
+
+            if (typeof number === 'number' && (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
+                frame(s, opt.trims, function (err, f) {    // counts # of frames for trimmed one
                     if (err) {
                         reject(err)
                         return
