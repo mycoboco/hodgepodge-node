@@ -597,7 +597,7 @@ function vidstab(s, t, opt, progress) {
             _opts = _opts.concat([ '-i', s ])
             if (trims && trims[1] > 0) _opts = _opts.concat([ '-t', trims[1]-trims[0] ])
             _opts = _opts.concat([
-                '-vf', 'vidstabdetect'+opt2str(detect)+',unsharp='+(unsharp || '5:5:0.8:3:3:0.4'),
+                '-vf', 'vidstabdetect'+opt2str(detect),
                 '-f', 'null',
             ])
 
@@ -633,7 +633,7 @@ function vidstab(s, t, opt, progress) {
 
     trims = opt.trims
     opts = constructOpts([ '-i', s ], opt, accepts, [
-        '-vf', 'vidstabtransform'+opt2str(transform),
+        '-vf', 'vidstabtransform'+opt2str(transform)+',unsharp='+(unsharp || '5:5:0.8:3:3:0.4'),
         '-vcodec', 'libx264',
         '-vprofile', 'high'
     ])
