@@ -599,10 +599,13 @@ function vidstab(s, t, opt, progress) {
                 '-f', 'null',
             ])
 
-            drive('-', _opts)
+            drive('-', _opts, info && progressHandler(trims && trims[0], trims && trims[1],
+                                                      info[0].duration,
+                                                      function (p) { progress(p/2) }))
             .then(function () {
                 drive(t, opts, info && progressHandler(trims && trims[0], trims && trims[1],
-                                                       info[0].duration, progress))
+                                                       info[0].duration,
+                                                       function (p) { progress(0.5+p/2) }))
                 .then(resolve)
                 .catch(reject)
             })
