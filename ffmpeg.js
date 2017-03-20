@@ -576,17 +576,16 @@ function watermark(s, o, t, opt, progress) {
 function vidstab(s, t, opt, progress) {
     var trims, detect, transform, unsharp, opts
     var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'bitrates' ]
+    var trf = path.join(os.tmpdir(), path.basename(t)+'.trf')
 
     var opt2str = function (opt) {
         var s = ''
 
-        s = Object.keys(opt || {}).map(function (key) {
-            if (key !== 'result' && key !== 'input') return key+'='+opt[key]
+        Object.keys(opt || {}).forEach(function (key) {
+            if (key !== 'result' && key !== 'input') s += (':'+key+'='+opt[key])
         })
-        .filter(function (e) { return e })
-        .join(':')
 
-        return (s)? '='+s: ''
+        return s
     }
 
     var perform = function (info) {
@@ -597,7 +596,7 @@ function vidstab(s, t, opt, progress) {
             _opts = _opts.concat([ '-i', s ])
             if (trims && trims[1] > 0) _opts = _opts.concat([ '-t', trims[1]-trims[0] ])
             _opts = _opts.concat([
-                '-vf', 'vidstabdetect'+opt2str(detect),
+                '-vf', 'vidstabdetect=result='+trf+opt2str(detect),
                 '-f', 'null',
             ])
 
@@ -608,7 +607,10 @@ function vidstab(s, t, opt, progress) {
                 drive(t, opts, info && progressHandler(trims && trims[0], trims && trims[1],
                                                        info[0].duration,
                                                        function (p) { progress(0.5+p/2) }))
-                .then(resolve)
+                .then(function (t) {
+                    fs.unlink(trf)
+                    resolve(t)
+                })
                 .catch(reject)
             })
             .catch(reject)
@@ -633,7 +635,8 @@ function vidstab(s, t, opt, progress) {
 
     trims = opt.trims
     opts = constructOpts([ '-i', s ], opt, accepts, [
-        '-vf', 'vidstabtransform'+opt2str(transform)+',unsharp='+(unsharp || '5:5:0.8:3:3:0.4'),
+        '-vf', 'vidstabtransform=input='+trf+opt2str(transform)+',unsharp='+
+                   (unsharp || '5:5:0.8:3:3:0.4'),
         '-vcodec', 'libx264',
         '-vprofile', 'high'
     ])
