@@ -573,7 +573,7 @@ function watermark(s, o, t, opt, progress) {
 }
 
 
-function vidstab(s, t, opt) {
+function vidstab(s, t, opt, progress) {
     var trims, opts
     var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'bitrates' ]
 
@@ -589,7 +589,7 @@ function vidstab(s, t, opt) {
                 '-f', 'null',
             ])
 
-            drive('-', opts)
+            drive('-', _opts)
             .then(function () {
                 drive(t, opts, info && progressHandler(trims && trims[0], trims && trims[1],
                                                        info[0].duration, progress))
