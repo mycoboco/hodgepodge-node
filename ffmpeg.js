@@ -232,8 +232,7 @@ function copy(s, t, opt, progress) {
     opt = defaults(opt, {
         mute:        false,
         resetRotate: true,
-        fastStart:   true,
-        trims:       [ -1, -1 ]
+        fastStart:   true
     })
 
     trims = opt.trims
@@ -266,7 +265,6 @@ function compress(s, t, opt, progress) {
         mute:        false,
         resetRotate: true,
         fastStart:   true,
-        trims:       [ -1, -1 ],
         bitrates:    [ '4M', '6M' ]
     })
 
@@ -372,7 +370,6 @@ function playrate(s, t, opt, progress) {
     opt = defaults(opt, {
         resetRotate: true,
         fastStart:   true,
-        trims:       [ -1, -1 ],
         playrate:    4
     })
 
@@ -465,8 +462,6 @@ function preview(s, t, opt) {
 
     if (Array.isArray(s)) s = s[0]
 
-    opt = defaults(opt, { trims: [ -1, -1 ] })
-
     height = opt.height || 120
     if (typeof opt.fps === 'number') fps = opt.fps
     else number = opt.number || 100
@@ -486,9 +481,10 @@ function preview(s, t, opt) {
                                            '-vf', 'select=not(mod(n\\,'+fps+')),scale=-1:'+height+
                                                       ',tile='+number+'x1' ])
                 } else {
-                    nframe = Math.min(((opt.trims[1] > 0)? opt.trims[1]: info[0].duration),
+                    nframe = Math.min(((opt.trims && opt.trims[1] > 0)?
+                                           opt.trims[1]: info[0].duration),
                                       info[0].duration)
-                    if (opt.trims[0] >= 0) nframe -= opt.trims[0]
+                    if (opt.trims && opt.trims[0] >= 0) nframe -= opt.trims[0]
                     number = Math.max(1, Math.floor(nframe / fps))
                     opts = constructOpts([ '-i', s ], opt, accepts,
                                          [ '-frames', '1',
@@ -501,8 +497,9 @@ function preview(s, t, opt) {
                 .catch(reject)
             }
 
-            if (typeof number === 'number' && (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
-                frame(s, opt.trims, function (err, f) {    // counts # of frames for trimmed one
+            if (typeof number === 'number' && opt.trims &&
+                (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
+                frame(s, opt.trims, function (err, f) {    // counts # of frames of trimmed one
                     if (err) {
                         reject(err)
                         return
