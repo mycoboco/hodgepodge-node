@@ -608,17 +608,24 @@ function vidstab(s, t, opt, progress) {
                                                        info[0].duration,
                                                        function (p) { progress(0.5+p/2) }))
                 .then(function (t) {
-                    fs.unlink(trf)
+                    clean()
                     resolve(t)
                 })
-                .catch(reject)
+                .catch(function (err) {
+                    clean()
+                    reject(err)
+                })
             })
-            .catch(reject)
+            .catch(function (err) {
+                clean()
+                reject(err)
+            })
         })
     }
 
     if (Array.isArray(s)) s = s[0]
 
+    temps.push(trf)
     opt = defaults(opt, {
         mute:        false,
         resetRotate: true,
