@@ -486,10 +486,10 @@ function preview(s, t, opt) {
                                            '-vf', 'select=not(mod(n\\,'+fps+')),scale=-1:'+height+
                                                       ',tile='+number+'x1' ])
                 } else {
-                    number = Math.max(1,
-                                      Math.floor(((opt.trims[1] > 0)?
-                                                     Math.min(opt.trims[1], info[0].duration):
-                                                     info[0].duration) / fps))
+                    nframe = Math.min(((opt.trims[1] > 0)? opt.trims[1]: info[0].duration),
+                                      info[0].duration)
+                    if (opt.trims[0] >= 0) nframe -= opt.trims[0]
+                    number = Math.max(1, Math.floor(nframe / fps))
                     opts = constructOpts([ '-i', s ], opt, accepts,
                                          [ '-frames', '1',
                                            '-vf', 'fps=1/'+fps+',scale=-1:'+height+',tile='+number+
