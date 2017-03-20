@@ -580,11 +580,13 @@ function vidstab(s, t, opt, progress) {
     var opt2str = function (opt) {
         var s = ''
 
-        Object.keys(opt || {}).forEach(function (key) {
-            if (key !== 'result' && key !== 'input') s += ':'+key+'='+opt[key]
+        s = Object.keys(opt || {}).map(function (key) {
+            if (key !== 'result' && key !== 'input') return key+'='+opt[key]
         })
+        .filter(function (e) { return e })
+        .join(':')
 
-        return (s)? '='+s.substring(1): ''
+        return (s)? '='+s: ''
     }
 
     var perform = function (info) {
