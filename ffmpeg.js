@@ -573,6 +573,68 @@ function watermark(s, o, t, opt, progress) {
 }
 
 
+function vidstab(s, t, opt) {
+    var trims, opts
+    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'bitrates' ]
+
+    var perform = function (info) {
+        return new Promise(function (resolve, reject) {
+            var _opts = []
+
+            if (trims && trims[0] >= 0) _opts = _opts.concat([ '-ss', trims[0] ])
+            _opts = _opts.concat([ '-i', s ])
+            if (trims && trims[1] > 0) _opts = _opts.concat([ '-t', trims[1]-trims[0] ])
+            _opts = _opts.concat([
+                '-vf', 'vidstabdetect',
+                '-f', 'null',
+            ])
+
+            drive('-', opts)
+            .then(function () {
+                drive(t, opts, info && progressHandler(trims && trims[0], trims && trims[1],
+                                                       info[0].duration, progress))
+                .then(resolve)
+                .catch(reject)
+            })
+            .catch(reject)
+        })
+    }
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true,
+        bitrates:    [ '4M', '6M' ]
+    })
+
+    trims = opt.trims
+    opts = constructOpts([ '-i', s ], opt, accepts, [
+        '-vf', 'vidstabtransform',
+        '-vcodec', 'libx264',
+        '-vprofile', 'high'
+    ])
+
+    if (progress) {
+        return new Promise(function (resolve, reject) {
+            probe(s)
+            .then(perform)
+            .catch(reject)
+        })
+    } else {
+        return perform()
+    }
+}
+
+
+init('/usr/bin')
+preview('/home/mycoboco/test.mp4', '/home/mycoboco/output.jpg', {
+    height: 480,
+    fps: 5
+})
+
+
 module.exports = {
     init:      init,
     probe:     probe,
@@ -582,7 +644,8 @@ module.exports = {
     playrate:  playrate,
     thumbnail: thumbnail,
     preview:   preview,
-    watermark: watermark
+    watermark: watermark,
+    vidstab:   vidstab
 }
 
 // end of ffmpeg.js
