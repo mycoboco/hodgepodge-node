@@ -652,6 +652,7 @@ function vidstab(s, t, opt, progress) {
         return new Promise(function (resolve, reject) {
             probe(s)
             .then(perform)
+            .then(resolve)
             .catch(reject)
         })
     } else {
