@@ -397,6 +397,7 @@ function playrate(s, t, opt, progress) {
 
 
 function thumbnail(s, t, opt) {
+    var mapper
     var accepts = [ 'resolution', 'trims', 'quality' ]
     var funcs = []
 
@@ -411,13 +412,15 @@ function thumbnail(s, t, opt) {
     if (Array.isArray(s)) s = s[0]
 
     opt = defaults(opt, {
-        thumbnails: [ 0 ],
+        thumbnails: [ 0 ]
     })
 
     if (typeof opt.thumbnails === 'number') {
         opt.thumbnails = [ opt.thumbnails ]
-        tname = function (t) { return t }
+        tname = function (t) { return t }    // overrided
     }
+    mapper = opt.mapper || function (i) { return i }
+    delete opt.mapper
 
     return new Promise(function (resolve, reject) {
         probe(s)
@@ -439,7 +442,7 @@ function thumbnail(s, t, opt) {
                     }
 
                     funcs.push(function (callback) {
-                        drive(tname(t, i), opts)
+                        drive(tname(t, mapper(i)), opts)
                         .then(function (t) { callback(null, t) })
                         .catch(callback)
                     })
