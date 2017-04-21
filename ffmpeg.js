@@ -364,13 +364,15 @@ function merge(ss, t, opt, progress) {
 
 function playrate(s, t, opt, progress) {
     var trims, playrate, opts
-    var accepts = [ 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'playrate' ]
+    var accepts = [ 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
+                    'playrate' ]
 
     if (Array.isArray(s)) s = s[0]
 
     opt = defaults(opt, {
         resetRotate: true,
         fastStart:   true,
+        crf:         26,
         playrate:    4
     })
 
@@ -522,12 +524,14 @@ function preview(s, t, opt) {
 
 function watermark(s, o, t, opt, progress) {
     var trims, opts, overlay
-    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims', 'position', 'margins' ]
+    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv', 'position',
+                    'margins' ]
 
     opt = defaults(opt, {
         mute:        false,
         resetRotate: true,
         fastStart:   true,
+        crf:         26,
         position:    'left top',
         margins:     [ 0, 0 ]
     })
@@ -578,8 +582,9 @@ function watermark(s, o, t, opt, progress) {
 
 
 function vidstab(s, t, opt, progress) {
-    var trims, detect, transform, unsharp, opts
-    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv' ]
+    var trims, detect, opts
+    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
+                    'detect', 'transform', 'unsharp' ]
     var trf = path.join(os.tmpdir(), path.basename(t)+'.trf')
 
     var opt2str = function (opt) {
