@@ -401,7 +401,7 @@ function playrate(s, t, opt, progress) {
 
 function thumbnail(s, t, opt) {
     var mapper
-    var accepts = [ 'resolution', 'trims', 'quality' ]
+    var accepts = [ 'resolution', 'trims', 'quality', 'mapper' ]
     var funcs = []
 
     var tname = function (t, i) {
@@ -423,7 +423,6 @@ function thumbnail(s, t, opt) {
         tname = function (t) { return t }    // overrided
     }
     mapper = opt.mapper || function (i) { return i }
-    delete opt.mapper
 
     return new Promise(function (resolve, reject) {
         probe(s)
@@ -464,16 +463,13 @@ function thumbnail(s, t, opt) {
 
 function preview(s, t, opt) {
     var height, number, fps, opts
-    var accepts = [ 'trims', 'quality' ]
+    var accepts = [ 'trims', 'number', 'fps', 'height', 'quality' ]
 
     if (Array.isArray(s)) s = s[0]
 
     height = opt.height || 120
     if (typeof opt.fps === 'number') fps = opt.fps
     else number = opt.number || 100
-    delete opt.height
-    delete opt.number
-    delete opt.fps
 
     return new Promise(function (resolve, reject) {
         probe(s)
@@ -643,16 +639,10 @@ function vidstab(s, t, opt, progress) {
     })
 
     detect = opt.detect
-    transform = opt.transform
-    unsharp = opt.unsharp
-    delete opt.detect
-    delete opt.transform
-    delete opt.unsharp
-
     trims = opt.trims
     opts = constructOpts([ '-i', s ], opt, accepts, [
-        '-vf', 'vidstabtransform=input='+trf+opt2str(transform)+',unsharp='+
-                   (unsharp || '5:5:0.8:3:3:0.4'),
+        '-vf', 'vidstabtransform=input='+trf+opt2str(opt.transform)+',unsharp='+
+                   (opt.unsharp || '5:5:0.8:3:3:0.4'),
         '-vcodec', 'libx264',
         '-vprofile', 'high'
     ])
