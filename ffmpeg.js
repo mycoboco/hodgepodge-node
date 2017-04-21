@@ -200,9 +200,9 @@ function constructOpts(input, _opt, accepts, cmds) {
     if (opt.fps) opts.push('-r', opt.fps)
     // opt.playrate goes into cmds
     if (cmds) opts = opts.concat(cmds)
-    if (opt.bitrates && opt.bitrates.length === 2) {
-        opts.push('-b:v', opt.bitrates[0], '-bt', opt.bitrates[1])
-    }
+    if (isFinite(+opt.crf)) opts.push('-crf', opt.crf)
+    if (isFinite(+opt.vbv)) opts.push('-maxrate', +opt.vbv+'M', '-bufsize', (+opt.vbv*2)+'M')
+
     if (opt.quality) opts.push('-q:v', ''+Math.max(2, Math.min(opt.quality, 31)))
     if (opt.resolution) opts.push('-s', opt.resolution)
     if (typeof opt.mute === 'boolean') {
@@ -257,7 +257,8 @@ function copy(s, t, opt, progress) {
 
 function compress(s, t, opt, progress) {
     var trims, opts
-    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'bitrates' ]
+    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'crf',
+                    'vbv' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -265,7 +266,7 @@ function compress(s, t, opt, progress) {
         mute:        false,
         resetRotate: true,
         fastStart:   true,
-        bitrates:    [ '4M', '6M' ]
+        crf:         26
     })
 
     trims = opt.trims
@@ -578,7 +579,7 @@ function watermark(s, o, t, opt, progress) {
 
 function vidstab(s, t, opt, progress) {
     var trims, detect, transform, unsharp, opts
-    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'bitrates' ]
+    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv' ]
     var trf = path.join(os.tmpdir(), path.basename(t)+'.trf')
 
     var opt2str = function (opt) {
@@ -633,7 +634,7 @@ function vidstab(s, t, opt, progress) {
         mute:        false,
         resetRotate: true,
         fastStart:   true,
-        bitrates:    [ '4M', '6M' ]
+        crf:         26
     })
 
     detect = opt.detect
