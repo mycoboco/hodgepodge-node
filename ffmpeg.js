@@ -218,7 +218,7 @@ function progressHandler(s, e, duration, cb) {
     return function (prog) {
         s = (s && s > 0)? s: 0
         e = (e && e > 0)? Math.min(e, duration): duration
-        cb(Math.min(prog / (e-s), 1))
+        typeof cb === 'function' && cb(Math.min(prog / (e-s), 1))
     }
 }
 
