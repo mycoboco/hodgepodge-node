@@ -271,8 +271,7 @@ function compress(s, t, opt, progress) {
 
     trims = opt.trims
     opts = constructOpts([ '-i', s ], opt, accepts, [
-        '-vcodec', 'libx264',
-        '-vprofile', 'high'
+        '-vcodec', 'libx264'
     ])
 
     if (progress) {
@@ -643,8 +642,7 @@ function vidstab(s, t, opt, progress) {
     opts = constructOpts([ '-i', s ], opt, accepts, [
         '-vf', 'vidstabtransform=input='+trf+opt2str(opt.transform)+',unsharp='+
                    (opt.unsharp || '5:5:0.8:3:3:0.4'),
-        '-vcodec', 'libx264',
-        '-vprofile', 'high'
+        '-vcodec', 'libx264'
     ])
 
     if (progress) {
