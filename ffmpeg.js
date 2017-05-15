@@ -658,6 +658,68 @@ function vidstab(s, t, opt, progress) {
 }
 
 
+function blur(s, t, opt, progress) {
+    var trims, opts
+    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
+                    'type', 'blurs' ]
+
+    var opt2str = function (type, blurs, info) {
+        var s = ''
+
+        blurs.forEach(function (bs, idx) {
+            var w, h, x, y, x2, y2
+
+            x  = Math.floor((bs[0] <= 1)? bs[0]*info[0].width:  bs[0])
+            y  = Math.floor((bs[1] <= 1)? bs[1]*info[0].height: bs[1])
+            x2 = Math.floor((bs[2] <= 1)? bs[2]*info[0].width:  bs[2])
+            y2 = Math.floor((bs[3] <= 1)? bs[3]*info[0].height: bs[3])
+            w = Math.min(x2, info[0].width)  - Math.max(0, x)
+            h = Math.min(y2, info[0].height) - Math.max(0, y)
+            s += '[0:v]crop='+w+':'+h+':'+x+':'+y+','+type+'='+bs[4]+'[b'+idx+'];'
+        })
+        blurs.forEach(function (bs, idx) {
+            var w, h, x, y, x2, y2
+
+            x  = Math.floor((bs[0] <= 1)? bs[0]*info[0].width:  bs[0])
+            y  = Math.floor((bs[1] <= 1)? bs[1]*info[0].height: bs[1])
+            s += ((idx === 0)? '[0:v]': '[ovr'+(idx-1)+']')+
+                     '[b'+idx+']overlay='+x+':'+y+'[ovr'+idx+'];'
+        })
+
+        return s.substring(0, s.length-1)
+    }
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true,
+        crf:         26,
+        type:        'boxblur',
+        blurs:       [[ 0, 0, 1, 1, 10 ]]
+    })
+
+    return new Promise(function (resolve, reject) {
+        probe(s)
+        .then(function (info) {
+            trims = opt.trims
+            opts = constructOpts([ '-i', s ], opt, accepts, [
+                '-filter_complex', opt2str(opt.type, opt.blurs, info),
+                '-map', '[ovr'+(opt.blurs.length-1)+']',
+                '-vcodec', 'libx264'
+            ])
+
+            drive(t, opts, progressHandler(trims && trims[0], trims && trims[1], info[0].duration,
+                                           progress))
+            .then(resolve)
+            .catch(reject)
+        })
+        .catch(reject)
+    })
+}
+
+
 module.exports = {
     init:      init,
     probe:     probe,
@@ -668,7 +730,8 @@ module.exports = {
     thumbnail: thumbnail,
     preview:   preview,
     watermark: watermark,
-    vidstab:   vidstab
+    vidstab:   vidstab,
+    blur:      blur
 }
 
 // end of ffmpeg.js
