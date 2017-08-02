@@ -726,8 +726,8 @@ function blur(s, t, opt, progress) {
 module.exports = {
     init:      init,
     probe:     probe,
-    compress:  compress,
     copy:      copy,
+    compress:  compress,
     merge:     merge,
     playrate:  playrate,
     thumbnail: thumbnail,
