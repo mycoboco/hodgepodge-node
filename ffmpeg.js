@@ -195,7 +195,9 @@ function constructOpts(input, _opt, accepts, cmds) {
     if (opt.trims && opt.trims[1] > 0) {
         opts.push('-t', (opt.trims[1]-opt.trims[0]) / (opt.playrate || 1))
     }
-    if (opt.resetRotate) opts.push('-metadata:s:v:0', 'rotate=0')
+    if (typeof opt.keepMetadata) opts.push('-map_metadata', 0)
+    if (typeof opt.rotate !== 'number' && opt.resetRotate) opt.rotate = 0
+    if (typeof opt.rotate === 'number')  opts.push('-metadata:s:v:0', 'rotate='+opt.rotate)
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
     // opt.playrate goes into cmds
@@ -209,6 +211,7 @@ function constructOpts(input, _opt, accepts, cmds) {
         if (opt.mute) opts.push('-an')
         else opts.push('-acodec', 'copy')
     }
+    if (opt.createTime) opts.push('-metadata', 'creation_time='+opt.createTime.toISOString())
 
     return opts
 }
@@ -225,7 +228,7 @@ function progressHandler(s, e, duration, cb) {
 
 function copy(s, t, opt, progress) {
     var trims, opts
-    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims' ]
+    var accepts = [ 'mute', 'rotate', 'resetRotate', 'fastStart', 'trims', 'keepMetadata', 'createTime' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -257,8 +260,8 @@ function copy(s, t, opt, progress) {
 
 function compress(s, t, opt, progress) {
     var trims, opts
-    var accepts = [ 'mute', 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'crf',
-                    'vbv' ]
+    var accepts = [ 'mute', 'resolution', 'fps', 'rotate', 'resetRotate', 'fastStart', 'trims',
+                    'crf', 'vbv', 'keepMetadata', 'createTime' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -300,7 +303,7 @@ function clean() {
 
 function merge(ss, t, opt, progress) {
     var opts
-    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'unsafe' ]
+    var accepts = [ 'mute', 'rotate', 'resetRotate', 'fastStart', 'unsafe', 'createTime' ]
     var list = ''
     var listFile = path.join(os.tmpdir(), process.pid+'-'+(Math.floor(Math.random()*1000000)))
 
@@ -363,8 +366,8 @@ function merge(ss, t, opt, progress) {
 
 function playrate(s, t, opt, progress) {
     var trims, playrate, opts
-    var accepts = [ 'resolution', 'fps', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
-                    'playrate' ]
+    var accepts = [ 'resolution', 'fps', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
+                    'vbv', 'playrate', 'keepMetadata', 'createTime' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -519,8 +522,8 @@ function preview(s, t, opt) {
 
 function watermark(s, o, t, opt, progress) {
     var trims, opts, overlay
-    var accepts = [ 'mute', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv', 'position',
-                    'margins' ]
+    var accepts = [ 'mute', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
+                    'position', 'margins', 'keepMetadata', 'createTime' ]
 
     opt = defaults(opt, {
         mute:        false,
@@ -578,8 +581,8 @@ function watermark(s, o, t, opt, progress) {
 
 function vidstab(s, t, opt, progress) {
     var trims, detect, opts
-    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
-                    'detect', 'transform', 'unsharp' ]
+    var accepts = [ 'mute', 'resolution', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
+                    'vbv', 'detect', 'transform', 'unsharp', 'keepMetadata', 'createTime' ]
     var trf = path.join(os.tmpdir(), path.basename(t)+'.trf')
 
     var opt2str = function (opt) {
@@ -660,8 +663,8 @@ function vidstab(s, t, opt, progress) {
 
 function blur(s, t, opt, progress) {
     var trims, opts
-    var accepts = [ 'mute', 'resolution', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
-                    'type', 'blurs' ]
+    var accepts = [ 'mute', 'resolution', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
+                    'vbv', 'type', 'blurs', 'keepMetadata', 'createTime' ]
 
     var opt2str = function (type, blurs, info) {
         var s = ''
