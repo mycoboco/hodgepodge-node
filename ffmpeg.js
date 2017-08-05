@@ -88,7 +88,8 @@ function probe(ps) {
                     duration = /Duration: ([0-9]+:[0-9]+:[0-9\.]+)/,
                     bitrate = /bitrate: ([0-9]+) kb\/s/,
                     date = /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+\d+))/,
-                    creationTime = /creation_time\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2})/
+                    creationTime = /creation_time\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2})/,
+                    rotate = /rotate\s*:\s*([0-9]+)/
 
                 if (err) {
                     reject(err)
@@ -121,6 +122,17 @@ function probe(ps) {
                 } else {
                     creationTime = creationTime.exec(stderr)
                     if (creationTime) info.recordedAt = new Date(creationTime[1]+'Z')
+                }
+
+                rotate = rotate.exec(stderr)
+                if (rotate) {
+                    info.rotate = +rotate[1]
+                    if (info.rotate === 90 || info.rotate === 270) {
+                        info.corrected = {
+                            width:  info.height,
+                            height: info.width
+                        }
+                    }
                 }
 
                 if (!isFinite(info.nframe)) {    // nframe required
