@@ -735,6 +735,49 @@ function blur(s, t, opt, progress) {
 }
 
 
+function landscape(s, t, opt, progress) {
+    var trims, opts
+    var accepts = [ 'mute', 'resolution', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
+                    'vbv', 'type', 'blurs', 'keepMetadata', 'createTime' ]
+    var w, h
+
+    if (Array.isArray(s)) s = s[0]
+
+    opt = defaults(opt, {
+        mute:        false,
+        resetRotate: true,
+        fastStart:   true,
+        crf:         26,
+        resolution:  '1920x1080',
+        type:        'blur'
+    })
+
+    w = /^([0-9]+)x([0-9]+)$/i.exec(opt.resolution)
+    if (!w) w = 1920, h = 1080
+    else h = +w[2], w = +w[1]
+
+    return new Promise(function (resolve, reject) {
+        probe(s)
+        .then(function (info) {
+            trims = opt.trims
+            opts = constructOpts([ '-i', s ], opt, accepts, (opt.type === blur)? [
+                '-lavfi', '[0:v]scale=ih*'+w+'/'+h+':-1,boxblur=luma_radius=min(h\\,w)/20:'+
+                          'luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];'+
+                          '[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*'+h+'/'+w
+            ]: [
+                '-vf', 'pad=ih*'+w+'/'+h+':ih:(ow-iw)/2:(oh-ih)/2:color='+opt.type
+            ]
+
+            drive(t, opts, progressHandler(trims && trims[0], trims && trims[1], info[0].duration,
+                                           progress))
+            .then(resolve)
+            .catch(reject)
+        })
+        .catch(reject)
+    })
+}
+
+
 module.exports = {
     init:      init,
     probe:     probe,
@@ -746,7 +789,8 @@ module.exports = {
     preview:   preview,
     watermark: watermark,
     vidstab:   vidstab,
-    blur:      blur
+    blur:      blur,
+    landscape: landscape
 }
 
 // end of ffmpeg.js
