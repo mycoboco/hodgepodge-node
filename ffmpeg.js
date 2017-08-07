@@ -766,7 +766,7 @@ function landscape(s, t, opt, progress) {
                           '[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*'+h+'/'+w
             ]: [
                 '-vf', 'pad=ih*'+w+'/'+h+':ih:(ow-iw)/2:(oh-ih)/2:color='+opt.type
-            ]
+            ])
 
             drive(t, opts, progressHandler(trims && trims[0], trims && trims[1], info[0].duration,
                                            progress))
