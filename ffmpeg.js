@@ -209,7 +209,7 @@ function constructOpts(input, _opt, accepts, cmds) {
     }
     if (typeof opt.keepMetadata) opts.push('-map_metadata', 0)
     if (typeof opt.rotate !== 'number' && opt.resetRotate) opt.rotate = 0
-    if (typeof opt.rotate === 'number')  opts.push('-metadata:s:v:0', 'rotate='+opt.rotate)
+    if (typeof opt.rotate === 'number') opts.push('-metadata:s:v:0', 'rotate='+opt.rotate)
     if (opt.fastStart) opts.push('-movflags', '+faststart')
     if (opt.fps) opts.push('-r', opt.fps)
     // opt.playrate goes into cmds
