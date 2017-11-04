@@ -5,15 +5,14 @@
 'use strict'
 
 
-var mongoose, log
+var mongoose, db, log
 
 
 function connect(conf) {
-    var db = mongoose.connection
     var url = 'mongodb://'
 
     var reconnect = function () {
-        mongoose.connect(url, {
+        db.open(url, {
             db: {
                 native_parser: true
             },
@@ -50,7 +49,7 @@ function connect(conf) {
     })
     db.on('error', function (err) {
         log.error(err)
-        mongoose.disconnect()
+        db.close()
     })
     db.on('disconnected', function () {
         log.warning('disconnected from '+url+';'+
@@ -64,8 +63,8 @@ function connect(conf) {
 
 function close() {
     log.info('closing db connection')
-    mongoose.connection.removeAllListeners('disconnected')
-    mongoose.connection.close()
+    db.removeAllListeners('disconnected')
+    db.close()
 }
 
 
@@ -74,8 +73,10 @@ module.exports = function (_mongoose, _log) {
 
     mongoose = _mongoose
     log = _log || { info: nop, warning: nop, error: nop }
+    db = mongoose.createConnection()
 
     return {
+        db:      db,
         connect: connect,
         close:   close
     }
