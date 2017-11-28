@@ -19,19 +19,13 @@ module.exports = function (mongoose) {
 
         var reconnect = function () {
             db.open(url, {
-                db: {
-                    native_parser: true
-                },
+                db: { native_parser: true },
                 server: {
-                    socketOptions: {
-                        keepAlve: 1
-                    },
+                    socketOptions:  { keepAlve: 1 },
                     auto_reconnect: true
                 },
                 replset: {
-                    socketOptions: {
-                        keepAlive: 1
-                    }
+                    socketOptions: { keepAlive: 1 }
                 },
                 user: conf.user,
                 pass: conf.password
