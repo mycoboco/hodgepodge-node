@@ -57,7 +57,7 @@ module.exports = function (mongoose) {
     var close = function () {
         if (!db) return
 
-        log.info('closing db connection')
+        log && log.info('closing db connection')
         db.removeAllListeners('disconnected')
         db.close()
     }
