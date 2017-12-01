@@ -14,23 +14,8 @@ module.exports = function (mongoose) {
         log = _log || { info: nop, warning: nop, error: nop }
     }
 
-    var connect = function (conf) {
-        var url = 'mongodb://'
-
-        var reconnect = function () {
-            db.open(url, {
-                db: { native_parser: true },
-                server: {
-                    socketOptions:  { keepAlve: 1 },
-                    auto_reconnect: true
-                },
-                replset: {
-                    socketOptions: { keepAlive: 1 }
-                },
-                user: conf.user,
-                pass: conf.password
-            })
-        }
+    var connect = function (conf, cb) {
+        var db, url = 'mongodb://'
 
         if (conf.user && conf.password) url += conf.user+':'+conf.password+'@'
         if (Array.isArray(conf.replSet)) {
@@ -41,23 +26,32 @@ module.exports = function (mongoose) {
             url += conf.host+':'+conf.port
         }
         url += '/'+conf.db
+        if (conf.replicaSet) url += '?replicaSet='+conf.replicaSet
 
         log.info('connecting to '+url)
 
-        db.on('connected', function () {
+        mongoose.createConnection(url, {
+            useMongoClient:    true,
+            autoReconnect:     true,
+            reconnectInterval: conf.reconnectTime*1000,
+            keepAlive:         1,
+            socketTimeoutMS:   0
+        })
+        .on('connected', function () {
             log.info('connected to '+url)
         })
-        db.on('error', function (err) {
+        .on('error', function (err) {
             log.error(err)
-            db.close()
+            db && db.close()
         })
-        db.on('disconnected', function () {
-            log.warning('disconnected from '+url+';'+
-                        ' try to reconnect after '+conf.reconnectTime+' sec(s)')
-            setTimeout(reconnect, conf.reconnectTime*1000)
+        .on('reconnected', function () {
+            log.warning('reconnected to '+url)
         })
-
-        reconnect()
+        .then(function (_db) {
+            db = _db
+            cb(null, _db)
+        })
+        .catch(cb)
     }
 
     var close = function () {
@@ -68,14 +62,12 @@ module.exports = function (mongoose) {
         db.close()
     }
 
-    db = mongoose.createConnection()
 
     return {
-        db:      db,
         init:    init,
         connect: connect,
         close:   close
     }
 }
 
-// mongodb.js
+// mongoose.js
