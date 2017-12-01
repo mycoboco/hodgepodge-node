@@ -15,7 +15,7 @@ module.exports = function (mongoose) {
     }
 
     var connect = function (conf, cb) {
-        var db, url = 'mongodb://'
+        var url = 'mongodb://'
 
         if (conf.user && conf.password) url += conf.user+':'+conf.password+'@'
         if (Array.isArray(conf.replSet)) {
