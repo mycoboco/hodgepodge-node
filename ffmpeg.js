@@ -817,6 +817,48 @@ function landscape(s, t, opt, progress) {
 }
 
 
+function amix(s, a, t, opt, progress) {
+    var mix, opts
+    var accepts = [ 'volumes', 'keepMetadata', 'createTime' ]
+
+    opt = defaults(opt, { volumes: [ 1, 0.5 ] })
+
+    return new Promise(function (resolve, reject) {
+        probe([ s, a ])
+        .then(function (infos) {
+            mix = 'amovie='+a
+            if (infos[0].duration > infos[1].duration) {
+                mix += ':loop='+Math.ceil(infos[0].duration / infos[1].duration)
+            }
+            mix += '[s];'+
+                    '[s]volume='+opt.volumes[1]+'[a1]'
+
+            if (infos[0].audio) {
+                mix += ';[0:a]volume='+opt.volumes[0]+'[a0];'+
+                        '[a0][a1]amix=duration=shortest[a]'
+
+                opts = constructOpts([ '-i', s ], opt, accepts, [
+                    '-filter_complex', mix,
+                    '-map', '0:v', '-map', '[a]',
+                    '-c:v', 'copy', '-c:a', 'aac',
+                ])
+            } else {
+                opts = constructOpts([ '-i', s ], opt, accepts, [
+                    '-map', '0:v', '-map', '[a1]',
+                    '-c:v', 'copy', '-c:a', 'aac',
+                    '-shortest'
+                ])
+            }
+
+            drive(t, opts, progressHandler(null, null, infos[0].duration, progress))
+            .then(resolve)
+            .catch(reject)
+        })
+        .catch(reject)
+    })
+}
+
+
 module.exports = {
     init:      init,
     probe:     probe,
@@ -829,7 +871,8 @@ module.exports = {
     watermark: watermark,
     vidstab:   vidstab,
     blur:      blur,
-    landscape: landscape
+    landscape: landscape,
+    amix:      amix
 }
 
 // end of ffmpeg.js
