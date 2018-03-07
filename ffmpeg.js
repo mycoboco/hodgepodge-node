@@ -279,7 +279,8 @@ function progressHandler(s, e, duration, cb) {
 
 function copy(s, t, opt, progress) {
     var trims, opts
-    var accepts = [ 'mute', 'rotate', 'resetRotate', 'fastStart', 'trims', 'keepMetadata', 'createTime' ]
+    var accepts = [ 'mute', 'rotate', 'resetRotate', 'fastStart', 'trims', 'keepMetadata',
+                    'createTime' ]
 
     if (Array.isArray(s)) s = s[0]
 
