@@ -246,7 +246,7 @@ function constructOpts(input, _opt, accepts, cmds) {
     if (opt.trims && opt.trims[1] > 0) {
         opts.push('-t', (opt.trims[1]-opt.trims[0]) / (opt.playrate || 1))
     }
-    if (typeof opt.keepMetadata) opts.push('-map_metadata', 0)
+    if (opt.keepMetadata) opts.push('-map_metadata', 0)
     if (typeof opt.rotate !== 'number' && opt.resetRotate) opt.rotate = 0
     if (typeof opt.rotate === 'number') opts.push('-metadata:s:v:0', 'rotate='+opt.rotate)
     if (opt.fastStart) opts.push('-movflags', '+faststart')
