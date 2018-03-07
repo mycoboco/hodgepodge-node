@@ -12,6 +12,7 @@ var execf = require('child_process').execFile
 
 var async = require('async')
 var defaults = require('defaults')
+var mime = require('mime')
 
 
 var dir, log
@@ -70,84 +71,122 @@ function probe(ps) {
 
     ps = ps.map(function (p) {
         return new Promise(function (resolve, reject) {
-            var opts = [
-                '-probesize', '2147483647',
-                '-analyzeduration', '2147483647',
-                '-select_streams', 'v',
-                '-show_streams',
-                p
-            ]
             var info = {}
 
-            execf(path.join(dir, 'ffprobe'), opts, function (err, stdout, stderr) {
-                var nframe = /nb_frames=([0-9]+)/,
-                    width = /[^_]width=([0-9]+)/,
-                    height = /[^_]height=([0-9]+)/,
-                    dar = /display_aspect_ratio=([0-9]+:[0-9]+)/,
-                    fps = /,\s*([0-9.]+) fps/,
-                    duration = /Duration: ([0-9]+:[0-9]+:[0-9\.]+)/,
-                    bitrate = /bitrate: ([0-9]+) kb\/s/,
-                    date = /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+\d+))/,
-                    creationTime = /creation_time\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2})/,
-                    rotate = /rotate\s*:\s*([0-9]+)/
+            async.parallel([
+                function (callback) {
+                    var opts = [
+                        '-probesize', '2147483647',
+                        '-analyzeduration', '2147483647',
+                        '-select_streams', 'v',
+                        '-show_streams',
+                        p
+                    ]
 
+                    execf(path.join(dir, 'ffprobe'), opts, function (err, stdout, stderr) {
+                        var nframe = /nb_frames=([0-9]+)/,
+                            width = /[^_]width=([0-9]+)/,
+                            height = /[^_]height=([0-9]+)/,
+                            dar = /display_aspect_ratio=([0-9]+:[0-9]+)/,
+                            fps = /,\s*([0-9.]+) fps/,
+                            duration = /Duration: ([0-9]+:[0-9]+:[0-9\.]+)/,
+                            bitrate = /bitrate: ([0-9]+) kb\/s/,
+                            date = /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+\d+))/,
+                            creationTime = new RegExp('creation_time\\s*:\\s*'+
+                                                      '(\\d{4}-\\d{2}-\\d{2}[T| ]'+
+                                                      '\\d{2}:\\d{2}:\\d{2})'),
+                            rotate = /rotate\s*:\s*([0-9]+)/
+
+                        if (err) {
+                            callback(err)
+                            return
+                        }
+
+                        nframe = nframe.exec(stdout)
+                        if (nframe) info.nframe = +nframe[1]
+
+                        width = width.exec(stdout)
+                        if (width) info.width = +width[1]
+                        height = height.exec(stdout)
+                        if (height) info.height = +height[1]
+
+                        dar = dar.exec(stdout)
+                        if (dar) info.dar = dar[1]
+
+                        fps = fps.exec(stderr)
+                        if (fps) info.fps = +fps[1]
+
+                        duration = duration.exec(stderr)
+                        if (duration) info.duration = secsFromString(duration[1])
+
+                        bitrate = bitrate.exec(stderr)
+                        if (bitrate) info.bitrate = +bitrate[1]
+
+                        date = date.exec(stderr)
+                        if (date) {
+                            info.recordedAt = new Date(date[1])
+                        } else {
+                            creationTime = creationTime.exec(stderr)
+                            if (creationTime) info.recordedAt = new Date(creationTime[1]+'Z')
+                        }
+
+                        rotate = rotate.exec(stderr)
+                        if (rotate) {
+                            info.rotate = +rotate[1]
+                            if (info.rotate === 90 || info.rotate === 270) {
+                                info.corrected = {
+                                    width:  info.height,
+                                    height: info.width
+                                }
+                            }
+                        }
+
+                        // nframe required for videos
+                        if (mime.getType(p).indexOf('video/') === 0 && !isFinite(info.nframe)) {
+                            frame(p, function (err, f) {
+                                if (err) {
+                                    callback(err)
+                                    return
+                                }
+
+                                info.nframe = f
+                                callback()
+                            })
+                        } else {
+                            callback()
+                        }
+                    })
+                },
+                function (callback) {
+                    var opts = [
+                        '-probesize', '2147483647',
+                        '-analyzeduration', '2147483647',
+                        '-select_streams', 'a',
+                        '-show_streams',
+                        p
+                    ]
+
+                    execf(path.join(dir, 'ffprobe'), opts, function (err, stdout, stderr) {
+                        var audio = /\[STREAM\]\s+index=/
+
+                        if (err) {
+                            callback(err)
+                            return
+                        }
+
+                        audio = audio.exec(stdout)
+                        if (audio) info.audio = true
+
+                        callback()
+                    })
+                }
+            ], function (err) {
                 if (err) {
                     reject(err)
                     return
                 }
 
-                nframe = nframe.exec(stdout)
-                if (nframe) info.nframe = +nframe[1]
-
-                width = width.exec(stdout)
-                if (width) info.width = +width[1]
-                height = height.exec(stdout)
-                if (height) info.height = +height[1]
-
-                dar = dar.exec(stdout)
-                if (dar) info.dar = dar[1]
-
-                fps = fps.exec(stderr)
-                if (fps) info.fps = +fps[1]
-
-                duration = duration.exec(stderr)
-                if (duration) info.duration = secsFromString(duration[1])
-
-                bitrate = bitrate.exec(stderr)
-                if (bitrate) info.bitrate = +bitrate[1]
-
-                date = date.exec(stderr)
-                if (date) {
-                    info.recordedAt = new Date(date[1])
-                } else {
-                    creationTime = creationTime.exec(stderr)
-                    if (creationTime) info.recordedAt = new Date(creationTime[1]+'Z')
-                }
-
-                rotate = rotate.exec(stderr)
-                if (rotate) {
-                    info.rotate = +rotate[1]
-                    if (info.rotate === 90 || info.rotate === 270) {
-                        info.corrected = {
-                            width:  info.height,
-                            height: info.width
-                        }
-                    }
-                }
-
-                if (!isFinite(info.nframe)) {    // nframe required
-                    frame(p, function (err, f) {
-                        if (err) {
-                            reject(err)
-                            return
-                        }
-
-                        info.nframe = f
-                        resolve(info)
-                    })
-                } else {
-                    resolve(info)
-                }
+                resolve(info)
             })
         })
     })

@@ -24,6 +24,7 @@
     "colors": "^1.1.2",
     "defaults": "^1.0.2",
     "konphyg": "^1.4.0",
+    "mime": "^2.2.0",
     "minify": "^2.0.5",
     "node-sass": "^3.4.2",
     "redis": "^1.0.0",
