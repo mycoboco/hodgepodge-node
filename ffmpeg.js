@@ -845,6 +845,7 @@ function amix(s, a, t, opt, progress) {
                 ])
             } else {
                 opts = constructOpts([ '-i', s ], opt, accepts, [
+                    '-filter_complex', mix,
                     '-map', '0:v', '-map', '[a1]',
                     '-c:v', 'copy', '-c:a', 'aac',
                     '-shortest'
