@@ -800,12 +800,13 @@ function landscape(s, t, opt, progress) {
         probe(s)
         .then(function (info) {
             trims = opt.trims
-            opts = constructOpts([ '-i', s ], opt, accepts, (opt.type === blur)? [
+            opts = constructOpts([ '-i', s ], opt, accepts, (opt.type === 'blur')? [
                 '-lavfi', '[0:v]scale=ih*'+w+'/'+h+':-1,boxblur=luma_radius=min(h\\,w)/20:'+
                           'luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];'+
                           '[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*'+h+'/'+w
             ]: [
-                '-vf', 'pad=ih*'+w+'/'+h+':ih:(ow-iw)/2:(oh-ih)/2:color='+opt.type
+                '-vf', 'pad=ih*'+w+'/'+h+':ih:(ow-iw)/2:(oh-ih)/2'+
+                           ((opt.type === 'blur')? '': ':color='+opt.type)
             ])
 
             drive(t, opts, progressHandler(trims && trims[0], trims && trims[1], info[0].duration,
