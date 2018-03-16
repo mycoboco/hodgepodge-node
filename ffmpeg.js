@@ -258,6 +258,7 @@ function constructOpts(input, _opt, accepts, cmds) {
 
     if (opt.quality) opts.push('-q:v', ''+Math.max(2, Math.min(opt.quality, 31)))
     if (opt.resolution) opts.push('-s', opt.resolution)
+    else if (opt.scale) opts.push('-vf', 'scale='+opt.scale)
     if (typeof opt.mute === 'boolean') {
         if (opt.mute) opts.push('-an')
         else opts.push('-acodec', 'copy')
@@ -312,8 +313,8 @@ function copy(s, t, opt, progress) {
 
 function compress(s, t, opt, progress) {
     var trims, opts
-    var accepts = [ 'mute', 'resolution', 'fps', 'rotate', 'resetRotate', 'fastStart', 'trims',
-                    'crf', 'vbv', 'keepMetadata', 'createTime' ]
+    var accepts = [ 'mute', 'resolution', 'scale', 'fps', 'rotate', 'resetRotate', 'fastStart',
+                    'trims', 'crf', 'vbv', 'keepMetadata', 'createTime' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -418,8 +419,8 @@ function merge(ss, t, opt, progress) {
 
 function playrate(s, t, opt, progress) {
     var trims, playrate, opts
-    var accepts = [ 'resolution', 'fps', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
-                    'vbv', 'playrate', 'keepMetadata', 'createTime' ]
+    var accepts = [ 'resolution', 'scale', 'fps', 'rotate', 'resetRotate', 'fastStart', 'trims',
+                    'crf', 'vbv', 'playrate', 'keepMetadata', 'createTime' ]
 
     if (Array.isArray(s)) s = s[0]
 
@@ -455,7 +456,7 @@ function playrate(s, t, opt, progress) {
 
 function thumbnail(s, t, opt) {
     var mapper
-    var accepts = [ 'resolution', 'trims', 'quality', 'mapper' ]
+    var accepts = [ 'resolution', 'scale', 'trims', 'quality', 'mapper' ]
     var funcs = []
 
     var tname = function (t, i) {
@@ -633,8 +634,8 @@ function watermark(s, o, t, opt, progress) {
 
 function vidstab(s, t, opt, progress) {
     var trims, detect, opts
-    var accepts = [ 'mute', 'resolution', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
-                    'vbv', 'detect', 'transform', 'unsharp', 'keepMetadata', 'createTime' ]
+    var accepts = [ 'mute', 'resolution', 'scale', 'rotate', 'resetRotate', 'fastStart', 'trims',
+                    'crf', 'vbv', 'detect', 'transform', 'unsharp', 'keepMetadata', 'createTime' ]
     var trf = path.join(os.tmpdir(), path.basename(t)+'.trf')
 
     var opt2str = function (opt) {
@@ -715,8 +716,8 @@ function vidstab(s, t, opt, progress) {
 
 function blur(s, t, opt, progress) {
     var trims, opts
-    var accepts = [ 'mute', 'resolution', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
-                    'vbv', 'type', 'blurs', 'keepMetadata', 'createTime' ]
+    var accepts = [ 'mute', 'resolution', 'scale', 'rotate', 'resetRotate', 'fastStart', 'trims',
+                    'crf', 'vbv', 'type', 'blurs', 'keepMetadata', 'createTime' ]
 
     var opt2str = function (type, blurs, info) {
         var s = ''
