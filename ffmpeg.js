@@ -142,7 +142,8 @@ function probe(ps) {
                         }
 
                         // nframe required for videos
-                        if (mime.getType(p).indexOf('video/') === 0 && !isFinite(info.nframe)) {
+                        if ((mime.getType(p) || '').indexOf('video/') === 0 &&
+                            !isFinite(info.nframe)) {
                             frame(p, function (err, f) {
                                 if (err) {
                                     callback(err)
