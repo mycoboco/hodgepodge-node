@@ -21,7 +21,13 @@ var ncpu = os.cpus().length
 
 
 function init(_dir, _log) {
-    dir = _dir || '/usr/local/bin'
+    if (typeof _dir === 'string') {
+        _dir = {
+            ffmpeg:  _dir,
+            ffprobe: _dir
+        }
+    }
+    dir = _dir
     log = _log
 }
 
@@ -51,7 +57,7 @@ function frame(p, trims, cb) {
         '-y', '/dev/null'
     ])
 
-    execf(path.join(dir, 'ffmpeg'), opts, function (err, stdout, stderr) {
+    execf(path.join(dir.ffmpeg, 'ffmpeg'), opts, function (err, stdout, stderr) {
         var nframe = /frame=\s*([0-9]+)/
 
         if (err) {
@@ -83,7 +89,7 @@ function probe(ps) {
                         p
                     ]
 
-                    execf(path.join(dir, 'ffprobe'), opts, function (err, stdout, stderr) {
+                    execf(path.join(dir.ffprobe, 'ffprobe'), opts, function (err, stdout, stderr) {
                         var nframe = /nb_frames=([0-9]+)/,
                             width = /[^_]width=([0-9]+)/,
                             height = /[^_]height=([0-9]+)/,
@@ -167,7 +173,7 @@ function probe(ps) {
                         p
                     ]
 
-                    execf(path.join(dir, 'ffprobe'), opts, function (err, stdout, stderr) {
+                    execf(path.join(dir.ffprobe, 'ffprobe'), opts, function (err, stdout, stderr) {
                         var audio = /\[STREAM\]\s+index=/
 
                         if (err) {
@@ -206,7 +212,7 @@ function drive(t, opts, progress) {
     opts.push('-y', '--', t)
 
     return new Promise(function (resolve, reject) {
-        ffmpeg = spawn(path.join(dir, 'ffmpeg'), opts, {
+        ffmpeg = spawn(path.join(dir.ffmpeg, 'ffmpeg'), opts, {
             stdio: (progress)? [ 'ignore', 'ignore', 'pipe' ]:
                                'ignore'    // to avoid hanging
         })
