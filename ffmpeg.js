@@ -524,11 +524,13 @@ function thumbnail(s, t, opt) {
 
 
 function preview(s, t, opt) {
-    var height, number, fps, opts
+    var tmp, height, number, fps, opts
     var accepts = [ 'trims', 'number', 'fps', 'height', 'quality' ]
 
     if (Array.isArray(s)) s = s[0]
 
+    tmp = opt.temp || path.basename(t, path.extname(t))+'-tmp.mp4'
+    delete opt.temp
     height = opt.height || 120
     if (typeof opt.fps === 'number') fps = opt.fps
     else number = opt.number || 100
@@ -537,9 +539,28 @@ function preview(s, t, opt) {
         probe(s)
         .then(function (info) {
             var perform = function (nframe) {
+                var infile = s, blank = Promise.resolve(infile)
+
                 if (typeof number === 'number') {
                     fps = Math.floor(nframe / number)
-                    if (fps === 0) fps = 1, number = nframe
+                    if (fps === 0) {
+                        fps = 1
+                        blank = function () {
+                            return new Promise(function (resolve, reject) {
+                                drive(tmp, constructOpts([
+                                    '-i', infile,
+                                    '-f', 'lavfi',
+                                    '-i', 'color=s='+info[0].width+'x'+info[0].height+':d='+
+                                              Math.ceil(number / info[0].fps)
+                                ], { crf: 18 }, [ 'crf' ], [
+                                    '-filter_complex', '[0:v][1]concat'
+                                ]))
+                                .then(resolve)
+                                .catch(reject)
+                            })
+                        }
+                        s = tmp
+                    }
                     opts = constructOpts([ '-i', s ], opt, accepts,
                                          [ '-frames', '1',
                                            '-vf', 'select=not(mod(n\\,'+fps+')),scale=-1:'+height+
@@ -556,9 +577,16 @@ function preview(s, t, opt) {
                                                       'x1' ])
                 }
 
-                drive(t, opts)
-                .then(resolve)
-                .catch(reject)
+                blank()
+                .then(function () { return drive(t, opts) })
+                .then(function (t) {
+                    fs.unlink(tmp, function () {})    // ignore errors
+                    resolve(t)
+                })
+                .catch(function (err) {
+                    fs.unlink(tmp, function () {})    // ignore errors
+                    reject(err)
+                })
             }
 
             if (typeof number === 'number' && opt.trims &&
