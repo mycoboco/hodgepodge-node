@@ -524,13 +524,13 @@ function thumbnail(s, t, opt) {
 
 
 function preview(s, t, opt) {
-    var tmp, height, number, fps, opts
-    var accepts = [ 'trims', 'number', 'fps', 'height', 'quality' ]
+    var height, number, fps, opts
+    var accepts = [ 'trims', 'number', 'fps', 'height', 'quality', 'blank' ]
+    var tmp = path.join(os.tmpdir(), path.basename(t)+'-tmp.mp4')
 
     if (Array.isArray(s)) s = s[0]
 
-    tmp = opt.temp || path.basename(t, path.extname(t))+'-tmp.mp4'
-    delete opt.temp
+    temps.push(tmp)
     height = opt.height || 120
     if (typeof opt.fps === 'number') fps = opt.fps
     else number = opt.number || 100
@@ -580,11 +580,11 @@ function preview(s, t, opt) {
                 blank()
                 .then(function () { return drive(t, opts) })
                 .then(function (t) {
-                    fs.unlink(tmp, function () {})    // ignore errors
+                    clean()
                     resolve(t)
                 })
                 .catch(function (err) {
-                    fs.unlink(tmp, function () {})    // ignore errors
+                    clean()
                     reject(err)
                 })
             }
