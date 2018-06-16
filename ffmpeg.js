@@ -539,7 +539,7 @@ function preview(s, t, opt) {
         probe(s)
         .then(function (info) {
             var perform = function (nframe) {
-                var infile = s, blank = Promise.resolve(infile)
+                var infile = s, blank = Promise.resolve.bind(Promise, null)
 
                 if (typeof number === 'number') {
                     fps = Math.floor(nframe / number)
