@@ -539,27 +539,31 @@ function preview(s, t, opt) {
         probe(s)
         .then(function (info) {
             var perform = function (nframe) {
-                var infile = s, blank = Promise.resolve.bind(Promise, null)
+                var blank = Promise.resolve.bind(Promise, null)
 
                 if (typeof number === 'number') {
                     fps = Math.floor(nframe / number)
                     if (fps === 0) {
                         fps = 1
-                        blank = function () {
-                            return new Promise(function (resolve, reject) {
-                                drive(tmp, constructOpts([
-                                    '-i', infile,
-                                    '-f', 'lavfi',
-                                    '-i', 'color=s='+info[0].width+'x'+info[0].height+':d='+
-                                              Math.ceil(number / info[0].fps)
-                                ], { crf: 18 }, [ 'crf' ], [
-                                    '-filter_complex', '[0:v][1]concat'
-                                ]))
-                                .then(resolve)
-                                .catch(reject)
-                            })
+                        if (opt.blank) {
+                            blank = (function (s) {
+                                return new Promise(function (resolve, reject) {
+                                    drive(tmp, constructOpts([
+                                        '-i', s,
+                                        '-f', 'lavfi',
+                                        '-i', 'color=s='+info[0].width+'x'+info[0].height+':d='+
+                                                Math.ceil(number / info[0].fps)
+                                    ], { crf: 18 }, [ 'crf' ], [
+                                        '-filter_complex', '[0:v][1]concat'
+                                    ]))
+                                    .then(resolve)
+                                    .catch(reject)
+                                })
+                            }).bind(null, s)
+                            s = tmp
+                        } else {
+                            number = nframe
                         }
-                        s = tmp
                     }
                     opts = constructOpts([ '-i', s ], opt, accepts,
                                          [ '-frames', '1',
