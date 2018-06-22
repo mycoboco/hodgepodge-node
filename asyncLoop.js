@@ -6,12 +6,12 @@
 'use strict'
 
 
-module.exports = function (iter, func, cb) {
-    var idx = 0
-    var done = false
+module.exports = (iter, func, cb) => {
+    let idx = 0
+    let done = false
 
-    var loop = {
-        next: function () {
+    const loop = {
+        next: () => {
             if (done) return
 
             if (idx < iter) {
@@ -21,7 +21,7 @@ module.exports = function (iter, func, cb) {
                 cb()
             }
         },
-        break: function () {
+        break: () => {
             done = true
             cb()
         }
