@@ -5,14 +5,18 @@
 'use strict'
 
 
-function dropPrivilege(runAs, log, exit) {
-    var nop = function () {}
-    log = log || { info: nop, warning: nop, error: nop }
-    exit = exit || nop
-
+module.exports = (
+    runAs,
+    log = {
+        info:    () => {},
+        warning: () => {},
+        error:   () => {}
+    },
+    exit = () => {}
+) => {
     if (runAs && runAs.uid && runAs.gid) {
         try {
-            log.info('try to run as '+runAs.uid+':'+runAs.gid)
+            log.info(`try to run as ${runAs.uid}:${runAs.gid}`)
             process.setgid(runAs.gid)
             process.setuid(runAs.uid)
         } catch(err) {
@@ -23,8 +27,5 @@ function dropPrivilege(runAs, log, exit) {
         log.warning('server will run as root!')
     }
 }
-
-
-module.exports = dropPrivilege
 
 // end of dropPrivilege.js
