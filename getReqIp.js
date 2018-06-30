@@ -5,8 +5,8 @@
 'use strict'
 
 
-function getReqIp(req) {
-    var ip = req.headers['x-forwarded-for'] ||
+module.exports = req => {
+    let ip = req.headers['x-forwarded-for'] ||
              req.connection.remoteAddress ||
              req.socket.remoteAddress ||
              req.connection.socket.remoteAddress
@@ -15,8 +15,5 @@ function getReqIp(req) {
 
     return ip && ip[1]
 }
-
-
-module.exports = getReqIp
 
 // end of getReqIp.js
