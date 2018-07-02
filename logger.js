@@ -4,22 +4,19 @@
 
 // cannot 'use strict' due to arguments.callee
 
-var defaults = require('defaults')
-var winston = require('winston')
-var colors = require('colors')
+const winston = require('winston')
+const colors = require('colors')
 
 
 // adds global property to trace call stacks
 !global.hasOwnProperty('__stack') && Object.defineProperty(global, '__stack', {
-    get: function() {
-        var orig = Error.prepareStackTrace
-        var err = new Error
+    get: () => {
+        const orig = Error.prepareStackTrace
+        const err = new Error
 
-        Error.prepareStackTrace = function(_, stack) {
-            return stack
-        }
+        Error.prepareStackTrace = (_, stack) => stack
         Error.captureStackTrace(err, arguments.callee)
-        var stack = err.stack
+        const stack = err.stack
         Error.prepareStackTrace = orig
 
         return stack
@@ -29,17 +26,13 @@ var colors = require('colors')
 
 // adds global property to get line number
 !global.hasOwnProperty('__line') && Object.defineProperty(global, '__line', {
-    get: function() {
-        return __stack[2].getLineNumber()
-    }
+    get: () => __stack[2].getLineNumber()
 })
 
 
 // adds global property to get function name
 !global.hasOwnProperty('__function') && Object.defineProperty(global, '__function', {
-    get: function() {
-        return __stack[2].getFunctionName()
-    }
+    get: () => __stack[2].getFunctionName()
 })
 
 
@@ -49,20 +42,19 @@ var colors = require('colors')
 //     stack:  true || false
 // }
 function create(conf) {
-    var info, warning, error
-
-    var locus = function (s) {
+    function locus(s) {
         // assumes Console used for output
         return (conf.level !== 'off' && process.stdout.isTTY)? s.cyan: s
     }
 
-    conf = defaults(conf, {
+    conf = {
         prefix: undefined,
         level:  'info',
-        stack:  true
-    })
+        stack:  true,
+        ...conf
+    }
 
-    var logger = new winston.Logger({
+    const logger = new winston.Logger({
         levels: {
             error:   0,
             warning: 1,
@@ -83,37 +75,36 @@ function create(conf) {
         ]: []
     })
 
-    info = logger.info
-    warning = logger.warning
-    error = logger.error
+    const info = logger.info
+    const warning = logger.warning
+    const error = logger.error
 
-    logger.info = function (err) {
-        var args = Array.prototype.slice.call(arguments)
+    logger.info = err => {
+        const args = Array.prototype.slice.call(arguments)
 
         err = err.message || err
-        args.push(locus(((__function)? __function+'': '(anonymous)')+':'+__line))
+        args.push(locus(`${(__function)? `${__function}`: '(anonymous)'}:${__line}`))
         info.apply(logger, args)
     }
 
-    logger.warning = function (err) {
-        var args = Array.prototype.slice.call(arguments)
+    logger.warning = err => {
+        const args = Array.prototype.slice.call(arguments)
 
         err = err.message || err
-        args.push(locus(((__function)? __function+'': '(anonymous)')+':'+__line))
+        args.push(locus(`${(__function)? `${__function}`: '(anonymous)'}:${__line}`))
         warning.apply(logger, args)
     }
 
-    logger.error = function (err) {
-        var args, stack
-
+    logger.error = err => {
         if (!err) return
 
+        let stack
         if (conf.stack) stack = err.stack
         err = err.message || err
-        err += ((stack)? '\n'+stack: '')
-        args = Array.prototype.slice.call(arguments)
+        err += ((stack)? `\n${stack}`: '')
+        const args = Array.prototype.slice.call(arguments)
 
-        args.push(locus(((__function)? __function+'': '(anonymous)')+':'+__line))
+        args.push(locus(`${(__function)? `${__function}`: '(anonymous)'}:${__line}`))
         error.apply(logger, args)
     }
 
@@ -122,7 +113,7 @@ function create(conf) {
 
 
 module.exports = {
-    create: create
+    create
 }
 
 // end of logger.js
