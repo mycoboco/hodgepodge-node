@@ -2,21 +2,23 @@
  *  konphyg wrapper
  */
 
-var path = require('path')
+const path = require('path')
 
-var konfig = require('konphyg')
-var defaults = require('defaults')
+const konfig = require('konphyg')
 
 
-module.exports = function (p, _conf) {
-    var conf = {}
-    var config = konfig(p)
+module.exports = (p, _conf) => {
+    const conf = {}
+    const config = konfig(p)
 
-    Object.keys(_conf).forEach(function (p) {
-        var sep = p.indexOf(':')
-        var key = (sep >= 0)? p.substring(sep+1): p
+    Object.keys(_conf).forEach(p => {
+        const sep = p.indexOf(':')
+        const key = (sep >= 0)? p.substring(sep+1): p
 
-        conf[key] = defaults(config(path.join(p.substring(0, sep), key)), _conf[p])
+        conf[key] = {
+            ...config(path.join(p.substring(0, sep), key)),
+            ..._conf[p]
+        }
     })
 
     return conf
