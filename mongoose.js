@@ -5,30 +5,34 @@
 'use strict'
 
 
-module.exports = function (mongoose) {
-    var db, log
+module.exports = mongoose => {
+    let db, log
 
-    var init = function (_log) {
-        var nop = function () {}
-
-        log = _log || { info: nop, warning: nop, error: nop }
+    function init(
+        _log = {
+            info:    () => {},
+            warning: () => {},
+            error:   () => {}
+        }
+    ) {
+        log = _log
     }
 
-    var connect = function (conf, cb) {
-        var url = 'mongodb://'
+    function connect(conf, cb) {
+        let url = 'mongodb://'
 
-        if (conf.user && conf.password) url += conf.user+':'+conf.password+'@'
+        if (conf.user && conf.password) url += `${conf.user}:${conf.password}@`
         if (Array.isArray(conf.replSet)) {
-            for (var i = 0; i < conf.replSet.length; i++) {
-                url += ((i > 0)? ',': '')+conf.replSet[i].host+':'+conf.replSet[i].port
+            for (let i = 0; i < conf.replSet.length; i++) {
+                url += `${(i > 0)? ',': ''}${conf.replSet[i].host}:${conf.replSet[i].port}`
             }
         } else {
-            url += conf.host+':'+conf.port
+            url += `${conf.host}:${conf.port}`
         }
-        url += '/'+conf.db
-        if (conf.replicaSet) url += '?replicaSet='+conf.replicaSet
+        url += `/${conf.db}`
+        if (conf.replicaSet) url += `?replicaSet=${conf.replicaSet}`
 
-        log.info('connecting to '+url)
+        log.info(`connecting to ${url}`)
 
         mongoose.createConnection(url, {
             useMongoClient:    true,
@@ -37,24 +41,20 @@ module.exports = function (mongoose) {
             keepAlive:         1,
             socketTimeoutMS:   0
         })
-        .on('connected', function () {
-            log.info('connected to '+url)
-        })
-        .on('error', function (err) {
+        .on('connected', () => log.info(`connected to ${url}`))
+        .on('error', err => {
             log.error(err)
             db && db.close()
         })
-        .on('reconnected', function () {
-            log.warning('reconnected to '+url)
-        })
-        .then(function (_db) {
+        .on('reconnected', () => log.warning(`reconnected to ${url}`))
+        .then(_db => {
             db = _db
             cb(null, _db)
         })
         .catch(cb)
     }
 
-    var close = function () {
+    function close() {
         if (!db) return
 
         log && log.info('closing db connection')
@@ -62,11 +62,10 @@ module.exports = function (mongoose) {
         db.close()
     }
 
-
     return {
-        init:    init,
-        connect: connect,
-        close:   close
+        init,
+        connect,
+        close
     }
 }
 
