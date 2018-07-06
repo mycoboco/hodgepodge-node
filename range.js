@@ -6,9 +6,7 @@
 
 
 function parse(range, stats) {
-    var r
-
-    var parse = function (r) {
+    function parse(r) {
         r = /bytes=([0-9]+)-([0-9]+)?/.exec(r)
         if (!r) return null
 
@@ -20,11 +18,11 @@ function parse(range, stats) {
 
     if (!range) return null
 
-    r = parse(range)
+    const r = parse(range)
     if (r) {
         if (r.e !== r.e) r.e = stats.size-1
         if (r.s >= stats.size || r.e >= stats.size || r.s > r.e) {
-            return new Error('invalid range request: '+range)
+            return new Error(`invalid range request: ${range}`)
         }
     }
 
@@ -33,13 +31,13 @@ function parse(range, stats) {
 
 
 function header(r, stats) {
-    return 'bytes '+r.s+'-'+r.e+'/'+stats.size
+    return `bytes ${r.s}-${r.e}/${stats.size}`
 }
 
 
 module.exports = {
-    parse:  parse,
-    header: header
+    parse,
+    header
 }
 
 // end of range.js
