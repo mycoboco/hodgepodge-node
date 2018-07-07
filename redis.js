@@ -4,26 +4,30 @@
 
 'use strict'
 
-var redis = require('redis')
+const redis = require('redis')
 
 
-module.exports = function () {
-    var client, log
+module.exports = () => {
+    let client, log
 
-    var init = function (_log) {
-        var nop = function () {}
-
-        log = _log || { info: nop, warning: nop, error: nop }
+    function init(
+        _log = {
+            info:    () => {},
+            warning: () => {},
+            error:   () => {}
+        }
+    ) {
+        log = _log
     }
 
-    var connect = function (conf, cb) {
-        var selectDb = function (err) {
+    function connect(conf, cb) {
+        function selectDb(err) {
             if (err) {
                 cb(err)
                 return
             }
 
-            log.info('selecting db #'+conf.db)
+            log.info(`selecting db #${conf.db}`)
             if (conf.db) {
                 client.select(conf.db, cb)
                 return
@@ -31,11 +35,9 @@ module.exports = function () {
             cb(err)
         }
 
-        log.info('connecting to redis('+conf.host+':'+conf.port+')')
+        log.info(`connecting to redis(${conf.host}:${conf.port})`)
         client = redis.createClient(conf.port, conf.host, conf.option)
-        client.on('error', function (err) {
-            log.error(err)
-        })
+        client.on('error', err => log.error(err))
         if (conf.auth) {
             log.info('logging into redis with authorization')
             client.auth(conf.auth, selectDb)
@@ -46,20 +48,20 @@ module.exports = function () {
         return client
     }
 
-    var close = function (cb) {
+    function close(cb) {
         if (!client) return
 
         log.info('closing redis connection')
-        client.quit(function (err) {
+        client.quit(err => {
             if (typeof cb === 'function') cb(err)
             else log.error(err)
         })
     }
 
     return {
-        init:    init,
-        connect: connect,
-        close:   close
+        init,
+        connect,
+        close
     }
 }
 
