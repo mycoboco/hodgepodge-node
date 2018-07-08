@@ -4,30 +4,35 @@
 
 'use strict'
 
-var fs = require('fs')
-var path = require('path')
+const fs = require('fs')
+const path = require('path')
 
-var sass = require('node-sass')
-
-
-var pub, log
+const sass = require('node-sass')
 
 
-function serve(_pub, _log) {
-    var nop = function () {}
+let pub, log
 
+
+function serve(
+    _pub,
+    _log = {
+        info:    () => {},
+        warning: () => {},
+        error:   () => {}
+    }
+) {
     pub = _pub
-    log = _log || { info: nop, warning: nop, error: nop }
+    log = _log
 
-    return function (req, res, next) {
-        var dir = path.dirname(req.url)
-        var name = path.basename(req.url, path.extname(req.url))
-                       .substring(1)    // foo from _foo.css
+    return (req, res, next) => {
+        const dir = path.dirname(req.url)
+        const name = path.basename(req.url, path.extname(req.url))
+                         .substring(1)    // foo from _foo.css
 
         sass.render({
-            file:        path.join(pub, dir, '+'+name+'.scss'),
+            file:        path.join(pub, dir, `+${name}.scss`),
             outputStyle: 'compressed'
-        }, function (err, result) {
+        }, (err, result) => {
             if (err) {
                 log.error(err)
                 next()
@@ -35,9 +40,7 @@ function serve(_pub, _log) {
             }
             res.header('Content-type', 'text/css')
                .send(result.css)
-            fs.writeFile(path.join(pub, req.url), result.css, function (err) {
-                err && log.error(err)
-            })
+            fs.writeFile(path.join(pub, req.url), result.css, err => err && log.error(err))
         })
     }
 }
@@ -53,8 +56,8 @@ function filter(req, res, next) {
 
 
 module.exports = {
-    serve:  serve,
-    filter: filter
+    serve,
+    filter
 }
 
 // end of sass.js
