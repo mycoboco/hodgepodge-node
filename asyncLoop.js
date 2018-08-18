@@ -32,4 +32,18 @@ module.exports = (iter, func, cb) => {
     return loop
 }
 
+
+!true && !function () {
+    const asyncLoop = module.exports
+    asyncLoop(
+        12,
+        (loop, x) => {
+            console.log(x);
+            if (x == 10) loop.break()
+            else loop.next()
+        },
+        () => console.log('done')
+    )
+}()
+
 // end of asyncLoop.js
