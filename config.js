@@ -24,4 +24,20 @@ module.exports = (p, _conf) => {
     return conf
 }
 
+
+!true && !function () {
+    config = module.exports
+    console.log(config(path.join('.', 'test'), {
+        'foo': {
+            'param': 1
+        },
+        'sub:bar': {
+            'param': 2
+        },
+        'none': {
+            'default': 3
+        }
+    }))
+}()
+
 // end of config.js
