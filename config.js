@@ -16,8 +16,8 @@ module.exports = (p, _conf) => {
         const key = (sep >= 0)? p.substring(sep+1): p
 
         conf[key] = {
-            ...config(path.join(p.substring(0, sep), key)),
-            ..._conf[p]
+            ..._conf[p],
+            ...config(path.join(p.substring(0, sep), key))
         }
     })
 
