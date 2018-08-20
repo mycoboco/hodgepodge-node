@@ -28,4 +28,19 @@ module.exports = (
     }
 }
 
+
+!true && !function () {
+    const user = require('os').userInfo().username
+    const drop = module.exports
+
+    drop({
+        uid: user,
+        gid: user
+    }, {
+        info:    console.log.bind(console),
+        warning: console.log.bind(console),
+        error:   console.log.bind(console)
+    })
+}()
+
 // end of dropPrivilege.js
