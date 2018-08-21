@@ -353,7 +353,7 @@ function merge(ss, t, opt, progress) {
         mute:        false,
         resetRotate: true,
         fastStart:   true,
-        unsafe:      false,
+        unsafe:      true,
         ...opt
     }
 
