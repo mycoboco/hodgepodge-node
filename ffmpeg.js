@@ -221,7 +221,8 @@ function drive(t, opts, progress) {
 
 
 function constructOpts(input, _opt, accepts, cmds) {
-    const opt = {}, opts = []
+    const opt = {}
+    let opts = []
 
     accepts.forEach(key => {
         if (typeof _opt[key] !== 'undefined') opt[key] = _opt[key]
