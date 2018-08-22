@@ -906,4 +906,70 @@ module.exports = {
     amix
 }
 
+
+!true && !function () {
+    const path = require('path')
+    const ffmpeg = module.exports
+    const test = path.join('.', 'test', 'sample.mp4')
+    const watermark = path.join('.', 'test', 'watermark.png')
+    const audio = path.join('.', 'test', 'sample.mp3')
+
+    ffmpeg.init('/usr/bin')
+    ffmpeg.probe(test)
+    .then(infos => console.log(infos))
+    .catch(err => console.log(err))
+
+    ffmpeg.copy(test, 'sample-copy.mp4', { rotate: 90 }, p => console.log(`copy: ${p}`))
+    .then(t => {
+        console.log(t)
+        return ffmpeg.compress(test, 'sample-comp.mp4', { crf: 35 },
+                               p => console.log(`compress: ${p}`))
+    })
+    .then(t => {
+        console.log(t)
+        return ffmpeg.playrate(test, 'sample-rate.mp4', { playrate: 0.5 },
+                               p => console.log(`playrate: ${p}`))
+    })
+    .then(t => {
+        console.log(t)
+        return ffmpeg.thumbnail(test, 'sample.jpg', { thumbnails: [ 1, 4 ] })
+    })
+    .then(t => {
+        console.log(t)
+        return ffmpeg.preview(test, 'sample-prv.jpg', { number: 10 })
+    })
+    .then(t => {
+        console.log(t)
+        return ffmpeg.watermark(test, watermark, 'sample-wm.mp4', { margins: [ 10, 10 ] },
+                                p => console.log(`watermark: ${p}`))
+    })
+    /*
+        .then(t => {
+            console.log(t)
+            return ffmpeg.vidstab(test, 'sample-vid.mp4', {}, p => console.log(`vidstab: ${p}`))
+        })
+    */
+    .then(t => {
+        console.log(t)
+        return ffmpeg.blur(test, 'sample-blur.mp4', { crf: 35 }, p => console.log(`blur: ${p}`))
+    })
+    .then(t => {
+        console.log(t)
+        return ffmpeg.landscape('sample-copy.mp4', 'sample-landscape.mp4', {},
+                                p => console.log(`landscape: ${p}`))
+    })
+    .then(t => {
+        console.log(t)
+        return ffmpeg.amix(test, audio, 'sample-amix.mp4', { volumes: [ 0, 1 ] },
+                           p => console.log(`amix: ${p}`))
+    })
+    .then(t => {
+        console.log(t)
+        return ffmpeg.merge([ path.resolve('sample-comp.mp4'), path.resolve('sample-blur.mp4') ],
+                            'sample-merge.mp4', { crf: 35 }, p => console.log(`merge: ${p}`))
+    })
+    .then(t => console.log(t))
+    .catch(err => console.log(err))
+}()
+
 // end of ffmpeg.js
