@@ -79,7 +79,7 @@ function create(conf) {
     const warning = logger.warning
     const error = logger.error
 
-    logger.info = err => {
+    logger.info = function (err) {
         const args = Array.prototype.slice.call(arguments)
 
         err = err.message || err
@@ -87,7 +87,7 @@ function create(conf) {
         info.apply(logger, args)
     }
 
-    logger.warning = err => {
+    logger.warning = function (err) {
         const args = Array.prototype.slice.call(arguments)
 
         err = err.message || err
@@ -95,7 +95,7 @@ function create(conf) {
         warning.apply(logger, args)
     }
 
-    logger.error = err => {
+    logger.error = function (err) {
         if (!err) return
 
         let stack
