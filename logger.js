@@ -116,4 +116,17 @@ module.exports = {
     create
 }
 
+
+!true && !function () {
+    const logger = module.exports
+    const log = logger.create({
+        prefix: 'test',
+        level:  'info'
+    })
+
+    log.info(new Error('information'))
+    log.warning(new Error('warning'))
+    log.error(new Error('error'))
+}()
+
 // end of logger.js
