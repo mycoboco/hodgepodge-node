@@ -7,7 +7,7 @@ const path = require('path')
 const konfig = require('konphyg')
 
 
-module.exports = (p, _conf) => {
+module.exports = (p = 'config', _conf) => {
     const conf = {}
     const config = konfig(p)
 

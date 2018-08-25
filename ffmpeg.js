@@ -18,7 +18,7 @@ const temps = []
 const ncpu = os.cpus().length
 
 
-function init(_dir, _log) {
+function init(_dir, _log = { warning: () => {} }) {
     if (typeof _dir === 'string') {
         _dir = {
             ffmpeg:  _dir,
@@ -228,7 +228,7 @@ function constructOpts(input, _opt, accepts, cmds) {
         if (typeof _opt[key] !== 'undefined') opt[key] = _opt[key]
         delete _opt[key]
     })
-    Object.keys(_opt).forEach(key => log && log.warning(`unsupported option: ${key}`))
+    Object.keys(_opt).forEach(key => log.warning(`unsupported option: ${key}`))
 
     if (opt.trims && opt.trims[0] >= 0) opts.push('-ss', opt.trims[0])
     opts = [ ...opts, ...input ]

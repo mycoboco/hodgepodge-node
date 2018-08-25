@@ -6,7 +6,7 @@
 'use strict'
 
 
-module.exports = (iter, func, cb) => {
+module.exports = (iter, func, cb = () => {}) => {
     let idx = 0
     let done = false
 

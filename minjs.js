@@ -14,7 +14,7 @@ let pub, log
 
 
 function serve(
-    _pub,
+    _pub = 'public',
     _log = {
         info:    () => {},
         warning: () => {},

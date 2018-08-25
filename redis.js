@@ -48,14 +48,11 @@ module.exports = () => {
         return client
     }
 
-    function close(cb) {
+    function close(cb = () => {}) {
         if (!client) return
 
         log.info('closing redis connection')
-        client.quit(err => {
-            if (typeof cb === 'function') cb(err)
-            else log.error(err)
-        })
+        client.quit(err => cb(err))
     }
 
     return {
