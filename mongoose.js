@@ -59,9 +59,9 @@ module.exports = mongoose => {
 
         log && log.info('closing db connection')
         db.removeAllListeners('connected')
-        db.removeAllListeners('error')
-        db.removeAllListeners('reconnected')
-        db.close()
+          .removeAllListeners('error')
+          .removeAllListeners('reconnected')
+          .close()
     }
 
     return {
