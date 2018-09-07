@@ -48,7 +48,7 @@ function frame(p, trims, cb) {
     if (trims && trims[1] > 0) opts.push('-t', trims[1]-trims[0])
     opts.push(
         '-vcodec', 'copy',
-        '-f', 'rawvideo',
+        '-f', 'null',
         '-y', '/dev/null'
     )
 
