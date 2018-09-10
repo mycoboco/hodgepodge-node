@@ -1,0 +1,32 @@
+{
+  "name": "@hodgepodge-node/web",
+  "version": "0.1.0",
+  "description": "a hodgepodge of web modules to help implement node.js servers",
+  "author": {
+    "name": "Woong Jun",
+    "email": "woong.jun@gmail.com",
+    "url": "http://code.woong.org/"
+  },
+  "contributors": [],
+  "homepage": "https://github.com/mycoboco/hodgepodge-node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mycoboco/hodgepodge-node"
+  },
+  "bugs": {
+    "url": "https://github.com/mycoboco/hodgepodge-node/issues",
+    "email": "woong.jun@gmail.com"
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "minify": "^2.0.5",
+    "node-sass": "^3.4.2"
+  },
+  "devDependencies": {},
+  "engines": { "node": ">=6.4.0" },
+  "keywords": [
+    "node.js server", "helper", "library",
+    "web"
+  ]
+}

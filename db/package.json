@@ -1,7 +1,7 @@
 {
-  "name": "hodgepodge-node",
+  "name": "@hodgepodge-node/db",
   "version": "0.1.0",
-  "description": "a hodgepodge of modules to help implement node.js servers",
+  "description": "a hodgepodge of db modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
     "email": "woong.jun@gmail.com",
@@ -18,20 +18,13 @@
     "email": "woong.jun@gmail.com"
   },
   "license": "MIT",
-  "private": true,
   "dependencies": {
-    "async": "^2.1.2",
-    "colors": "^1.1.2",
-    "konphyg": "^1.4.0",
-    "mime": "^2.2.0",
-    "minify": "^2.0.5",
-    "node-sass": "^3.4.2",
-    "redis": "^1.0.0",
-    "winston": "^2.2.0"
+    "redis": "^1.0.0"
   },
   "devDependencies": {},
   "engines": { "node": ">=6.4.0" },
   "keywords": [
-    "node.js server", "helper", "library"
+    "node.js server", "helper", "library",
+    "db"
   ]
 }
