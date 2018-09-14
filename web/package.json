@@ -18,7 +18,6 @@
     "email": "woong.jun@gmail.com"
   },
   "license": "MIT",
-  "private": true,
   "dependencies": {
     "minify": "^2.0.5",
     "node-sass": "^3.4.2"

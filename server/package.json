@@ -18,7 +18,6 @@
     "email": "woong.jun@gmail.com"
   },
   "license": "MIT",
-  "private": true,
   "dependencies": {
     "colors": "^1.1.2",
     "winston": "^2.2.0"
