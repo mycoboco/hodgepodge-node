@@ -19,7 +19,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "redis": "^1.0.0"
+    "redis": "^1.0.0",
+    "sequelize": "^5.1.0"
   },
   "devDependencies": {},
   "engines": { "node": ">=6.4.0" },
