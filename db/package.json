@@ -19,6 +19,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "mysql2": "^1.6.5",
     "redis": "^1.0.0",
     "sequelize": "^5.1.0"
   },
