@@ -2,8 +2,6 @@
  *  compiles and servers scss
  */
 
-'use strict'
-
 const fs = require('fs')
 const path = require('path')
 

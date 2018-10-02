@@ -2,8 +2,6 @@
  *  connects to or disconnects from Redis
  */
 
-'use strict'
-
 const redis = require('redis')
 
 

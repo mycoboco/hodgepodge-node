@@ -2,8 +2,6 @@
  *  extracts an IP from a HTTP request (for express and restify)
  */
 
-'use strict'
-
 
 module.exports = req => {
     let ip = req.headers['x-forwarded-for'] ||

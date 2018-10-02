@@ -2,8 +2,6 @@
  *  handles range information from HTTP headers
  */
 
-'use strict'
-
 
 function parse(range, stats) {
     function parse(r) {

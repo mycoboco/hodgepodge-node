@@ -2,8 +2,6 @@
  *  connects to or disconnects from MySQL
  */
 
-'use strict'
-
 const Sequelize = require('sequelize')
 
 

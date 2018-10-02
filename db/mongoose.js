@@ -2,8 +2,6 @@
  *  connects to or disconnects from MongoDB
  */
 
-'use strict'
-
 
 module.exports = mongoose => {
     let db, log

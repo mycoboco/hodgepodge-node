@@ -3,8 +3,6 @@
  *      from http://stackoverflow.com/a/4288992
  */
 
-'use strict'
-
 
 module.exports = (iter, func, cb = () => {}) => {
     let idx = 0

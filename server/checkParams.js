@@ -2,8 +2,6 @@
  *  checks request parameters
  */
 
-'use strict'
-
 
 module.exports = (res, rules) => {
     return !rules.some(r => {

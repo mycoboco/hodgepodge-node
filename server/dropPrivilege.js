@@ -2,8 +2,6 @@
  *  drops privieges by chaning uid/gid
  */
 
-'use strict'
-
 
 module.exports = (
     runAs,
