@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/video",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "a hodgepodge of video modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
