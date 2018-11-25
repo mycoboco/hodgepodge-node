@@ -4,6 +4,8 @@
 
 const { inspect } = require('util')
 
+
+// [ assertion, status code, variable name, value ]
 module.exports = (res, rules) => {
     return !rules.some(r => {
         if (!r[0]) {
