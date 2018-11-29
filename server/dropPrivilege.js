@@ -28,7 +28,7 @@ module.exports = (
 
 
 !true && !function () {
-    const user = require('os').userInfo().username
+    const { username: user } = require('os').userInfo()
     const drop = module.exports
 
     drop({
