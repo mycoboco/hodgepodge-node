@@ -7,7 +7,25 @@ const path = require('path')
 const konfig = require('konphyg')
 
 
-module.exports = (p = 'config', _conf) => {
+function traverse(obj, key, decrypt) {
+    const cur = obj[key]
+
+    if (cur !== null && typeof cur === 'object') {
+        Object.keys(cur).forEach(k => {
+            traverse(cur, k, decrypt)
+        })
+    } else if (typeof cur === 'string') {
+        const variable = /^\${?([A-Z_]+)}?/.exec(cur)
+        if (variable) {
+            let val = process.env[variable[1]]
+            if (typeof decrypt === 'function' && cur[1] === '{') val = decrypt(val)
+            obj[key] = val
+        }
+    }
+}
+
+
+module.exports = (p = 'config', _conf, opt) => {
     const conf = {}
     const config = konfig(p)
 
@@ -20,6 +38,8 @@ module.exports = (p = 'config', _conf) => {
             ...config(path.join(p.substring(0, sep), key))
         }
     })
+
+    if (opt.supportEnv) traverse({ conf }, 'conf', opt.decrypt)
 
     return conf
 }
