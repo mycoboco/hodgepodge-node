@@ -56,7 +56,16 @@ module.exports = (p = 'config', _conf, opt) => {
         },
         'none': {
             'default': 3
+        },
+        'env': {
+            'path': '$PATH',
+            'lang': '$LANG',
+            'home': '${HOME}',
+            'user': '${USER}'
         }
+    }, {
+        supportEnv: true,
+        decrypt:    text => (console.log(`decrypt ${text}`), text)
     }))
 }()
 
