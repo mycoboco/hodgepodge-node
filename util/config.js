@@ -39,7 +39,7 @@ module.exports = (p = 'config', _conf, opt) => {
         }
     })
 
-    if (opt.supportEnv) traverse({ conf }, 'conf', opt.decrypt)
+    if (opt && opt.supportEnv) traverse({ conf }, 'conf', opt.decrypt)
 
     return conf
 }
