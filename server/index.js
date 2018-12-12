@@ -1,4 +1,5 @@
 module.exports = {
+   ServerError:   require('./ServerError'),
    checkParams:   require('./checkParams'),
    checkHealth:   require('./checkHealth'),
    dropPrivilege: require('./dropPrivilege'),
