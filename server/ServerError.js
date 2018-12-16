@@ -1,6 +1,6 @@
 /*
- *  *  server errors
- *   */
+ *  server errors
+ */
 
 
 class ServerError extends Error {
