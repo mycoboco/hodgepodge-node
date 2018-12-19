@@ -7,7 +7,7 @@ const { inspect } = require('util')
 const ServerError = require('./ServerError')
 
 
-// [ assertion, status code, variable name, value ]
+// rule: [ assertion, status code, variable name, value ]
 module.exports = (res, rules) => {
     if (typeof res !== 'object' || typeof res.err !== 'function') {
         throw new Error('response object is missing')
