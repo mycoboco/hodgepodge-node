@@ -10,7 +10,9 @@ class ServerError extends Error {
             code = 500
         }
         if (isFinite(message.statusCode) && message.request && message.request.host) {
-            message = `${message.request.host} gave status code: ${message.statusCode}`
+            const { body } = message
+            message = `${message.request.host} gave status: ${message.statusCode} `+
+                      `(${(typeof body === 'string' && body)? body: message.statusMessage})`
         }
         super(message)
         Error.captureStackTrace(this, ServerError)
