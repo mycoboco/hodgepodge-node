@@ -7,20 +7,16 @@ const { inspect } = require('util')
 const ServerError = require('./ServerError')
 
 
-// rule: [ assertion, status code, variable name, value ]
-module.exports = (res, rules) => {
-    if (typeof res !== 'object' || typeof res.err !== 'function') {
-        throw new Error('response object is missing')
+function assert(assertion, code, variable, value = assertion) {
+    if (!assertion) {
+        const err = new ServerError(code, `invalid ${variable}: ${inspect(value)}`)
+        throw err
     }
 
-    return !rules.some(r => {
-        if (!Array.isArray(r)) throw new Error('incorrect rule format; did you miss any commas?')
-        if (!r[0]) {
-            // expects res.err() to accept ServerError
-            res.err(new ServerError(r[1], `invalid ${r[2]}: ${inspect(r[3])}`))
-            return true
-        }
-    })
+    return { and: assert }
 }
+
+
+module.exports = assert
 
 // end of checkParams.js
