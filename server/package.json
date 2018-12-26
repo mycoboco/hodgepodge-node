@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "colors": "^1.1.2",
+    "serve-static-restify": "^3.0.0",
     "winston": "^2.2.0"
   },
   "devDependencies": {},
