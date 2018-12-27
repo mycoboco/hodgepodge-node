@@ -6,7 +6,8 @@ module.exports = {
    dropPrivilege: require('./dropPrivilege'),
    getReqIp:      require('./getReqIp'),
    logger:        require('./logger'),
-   range:         require('./range')
+   range:         require('./range'),
+   fallback:      require('./fallback')
 }
 
 // end of index.js
