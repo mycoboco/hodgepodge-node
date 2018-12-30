@@ -9,7 +9,13 @@ class ServerError extends Error {
             message = code
             code = 500
         }
-        if (isFinite(message.statusCode) && message.request && message.request.host) {
+        if (message instanceof Error) {    // from Error
+            message.statusCode = code
+            return message
+        }
+        if (
+            isFinite(message.statusCode) && message.request && message.request.host
+        ) {    // from request's response
             const { body } = message
             message = `${message.request.host} gave status: ${message.statusCode} `+
                       `(${(typeof body === 'string' && body)? body: message.statusMessage})`
