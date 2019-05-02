@@ -156,7 +156,7 @@ module.exports = {
 }
 
 
-true && !function () {
+!true && !function () {
     const assert = module.exports
     let type
 
