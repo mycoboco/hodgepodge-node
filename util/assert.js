@@ -30,6 +30,11 @@ function isNonEmptyString(target) {
 }
 
 
+function isRegExp(target) {
+    return target instanceof RegExp
+}
+
+
 function isNumber(target) {
     return !!(typeof target === 'number' && isFinite(target))
 }
@@ -128,6 +133,7 @@ function like(target, ...specs) {
                     return target.every(t => like(t, spec[0]))
                 }
                 if (isNaNNumber(target) && isNaNNumber(spec)) return true
+                if (isString(target) && isRegExp(spec) && spec.test(target)) return true
                 return (target === spec)
         }
     })
@@ -143,6 +149,7 @@ module.exports = {
     TYPES,
     isString,
     isNonEmptyString,
+    isRegExp,
     isNumber,
     isNaN,
     isInteger,
@@ -175,6 +182,14 @@ module.exports = {
     console.log(assert.like(null,      'null'))
     console.log(assert.like(undefined, 'undefined'))
     console.log(assert.like(1,         '1'))
+
+    console.log('--- regexp ---')
+    console.log(assert.like('foo', /^f/))
+    console.log(assert.like('foo', /^f.o$/))
+    console.log(assert.like('foo', /^F/i))
+    console.log(assert.like('foo', /o/))
+    console.log(assert.like('foo', /^F/))
+    console.log(assert.like('foo', /^oo/))
 
     console.log('--- numbers ---')
     console.log(assert.like(0,             0))                // true
