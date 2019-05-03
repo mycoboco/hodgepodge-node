@@ -33,7 +33,6 @@ module.exports = () => {
             .authenticate()
             .then(() => {
                 log.info(`connected to ${url}`)
-                conn.sync()
                 cb(null, conn)
             })
             .catch(err => {
