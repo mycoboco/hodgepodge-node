@@ -26,17 +26,17 @@ function serve(
         const dir = path.dirname(req.url)
         const name = path.basename(req.url).substring(1)    // foo.js from _foo.js
 
-        minify(path.join(pub, dir, `+${name}`), (err, result) => {
-            if (err) {
-                log.error(err)
-                next()
-                return
-            }
+        minify(path.join(pub, dir, `+${name}`))
+        .then(result => {
             res.header('Content-type', 'text/javascript')
                .send(result)
             fs.writeFile(path.join(pub, req.url), result, err => {
                 err && log.error(err)
             })
+        })
+        .catch(err => {
+            log.error(err)
+            next()
         })
     }
 }
