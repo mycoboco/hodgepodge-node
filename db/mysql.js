@@ -40,6 +40,12 @@ module.exports = () => {
             })
     }
 
+    function sync(cb) {
+        conn.sync()
+        .then(() => cb())
+        .catch(cb)
+    }
+
     function close(cb = () => {}) {
        if (!conn) return
 
@@ -52,6 +58,7 @@ module.exports = () => {
     return {
         init,
         connect,
+        sync,
         close
     }
 }
