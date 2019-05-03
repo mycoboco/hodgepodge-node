@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/web",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "a hodgepodge of web modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
@@ -27,9 +27,7 @@
     "node": ">=6.4.0"
   },
   "keywords": [
-    "node.js server",
-    "helper",
-    "library",
+    "node.js server", "helper", "library",
     "web"
   ]
 }
