@@ -11,12 +11,13 @@ function Type(name, xtra) {
 
 
 const TYPES = {
-    STRING:  new Type('STRING',  { optional: true, nonempty: true }),
-    NUMBER:  new Type('NUMBER',  { optional: true }),
-    INTEGER: new Type('INTEGER', { optional: true }),
-    BOOLEAN: new Type('BOOLEAN', { optional: true }),
-    ARRAY:   new Type('ARRAY',   { optional: true, nonempty: true }),
-    OBJECT:  new Type('OBJECT',  { optional: true, nonempty: true })
+    STRING:    new Type('STRING',    { optional: true, nonempty: true }),
+    NUMBER:    new Type('NUMBER',    { optional: true }),
+    INTEGER:   new Type('INTEGER',   { optional: true }),
+    BOOLEAN:   new Type('BOOLEAN',   { optional: true }),
+    ARRAY:     new Type('ARRAY',     { optional: true, nonempty: true }),
+    OBJECT:    new Type('OBJECT',    { optional: true, nonempty: true }),
+    NOTEXISTS: new Type('NOTEXISTS')
 }
 
 
@@ -77,7 +78,7 @@ function isNonEmptyObject(target) {
 
 
 function like(target, ...specs) {
-    const { STRING, NUMBER, INTEGER, BOOLEAN, ARRAY, OBJECT } = TYPES
+    const { STRING, NUMBER, INTEGER, BOOLEAN, ARRAY, OBJECT, NOTEXISTS } = TYPES
 
     return specs.some(spec => {
         switch(spec) {
@@ -122,6 +123,9 @@ function like(target, ...specs) {
                 return isObject(target)
             case OBJECT.NONEMPTY:
                 return isNonEmptyObject(target)
+
+            case NOTEXISTS:
+                return (target === undefined)
 
             default:
                 if (isObject(spec) && isObject(target)) {
@@ -403,6 +407,41 @@ module.exports = {
         [ 'foo', 'bar', '' ],
         [ assert.TYPES.STRING.NONEMPTY ]
     ))
+
+    console.log('--- TYPES.NOTEXISTS ---')
+    type = assert.TYPES.NOTEXISTS
+    console.log(like(undefined, type))    // true
+    console.log(like(
+        {},
+        { foo: type }
+    ))
+    console.log(like(
+        { foo: true,            bar: 1 },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NUMBER },
+        { foo: TYPES.NOTEXISTS, bar: TYPES.NUMBER },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NOTEXISTS }
+    ))
+    console.log(like(
+        { foo: true },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NUMBER },
+        { foo: TYPES.NOTEXISTS, bar: TYPES.NUMBER },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NOTEXISTS }
+    ))
+    console.log(like(
+        {                       bar: 1 },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NUMBER },
+        { foo: TYPES.NOTEXISTS, bar: TYPES.NUMBER },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NOTEXISTS }
+    ))
+    console.log(like(    // false
+        { foo: true,            bar: '1' },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NUMBER },
+        { foo: TYPES.NOTEXISTS, bar: TYPES.NUMBER },
+        { foo: TYPES.BOOLEAN,   bar: TYPES.NOTEXISTS }
+    ))
+    console.log(like(false, type))
+    console.log(like(null, type))
+    console.log(like('', type))
 }()
 
 // end of assert.js
