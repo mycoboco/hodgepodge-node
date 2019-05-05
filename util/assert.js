@@ -433,15 +433,85 @@ module.exports = {
         { foo: TYPES.NOTEXISTS, bar: TYPES.NUMBER },
         { foo: TYPES.BOOLEAN,   bar: TYPES.NOTEXISTS }
     ))
+    console.log(like(
+        { foo: 'foo',                 bar: [ 1 ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: [ TYPES.NUMBER ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.NOTEXISTS },
+        { foo: TYPES.NOTEXISTS,       bar: [ TYPES.NUMBER ] }
+    ))
+    console.log(like(
+        { foo: 'foo' },
+        { foo: TYPES.STRING.NONEMPTY, bar: [ TYPES.NUMBER ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.NOTEXISTS },
+        { foo: TYPES.NOTEXISTS,       bar: [ TYPES.NUMBER ] }
+    ))
+    console.log(like(
+        {                             bar: [ 1 ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: [ TYPES.NUMBER ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.NOTEXISTS },
+        { foo: TYPES.NOTEXISTS,       bar: [ TYPES.NUMBER ] }
+    ))
     console.log(like(    // false
         { foo: true,            bar: '1' },
         { foo: TYPES.BOOLEAN,   bar: TYPES.NUMBER },
         { foo: TYPES.NOTEXISTS, bar: TYPES.NUMBER },
         { foo: TYPES.BOOLEAN,   bar: TYPES.NOTEXISTS }
     ))
+    console.log(like(
+        {},
+        { foo: TYPES.STRING.NONEMPTY, bar: [ TYPES.NUMBER ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.NOTEXISTS },
+        { foo: TYPES.NOTEXISTS,       bar: [ TYPES.NUMBER ] }
+    ))
+    console.log(like(
+        { foo: 'foo',                 bar: [ '1' ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: [ TYPES.NUMBER ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.NOTEXISTS },
+        { foo: TYPES.NOTEXISTS,       bar: [ TYPES.NUMBER ] }
+    ))
     console.log(like(false, type))
     console.log(like(null, type))
     console.log(like('', type))
+
+    console.log('--- for comparison ---')
+    console.log(like(    // true
+        {},
+        { foo: TYPES.BOOLEAN.OPTIONAL, bar: TYPES.NUMBER.OPTIONAL },
+    ))
+    console.log(like(    // false
+        { foo: 'true' },
+        { foo: TYPES.BOOLEAN.OPTIONAL, bar: TYPES.NUMBER.OPTIONAL },
+    ))
+    console.log(like(    // true
+        { foo: true,                   bar: 1 },
+        { foo: TYPES.BOOLEAN,          bar: TYPES.NUMBER.OPTIONAL },
+        { foo: TYPES.BOOLEAN.OPTIONAL, bar: TYPES.NUMBER }
+    ))
+    console.log(like(    // false
+        {},
+        { foo: TYPES.BOOLEAN,          bar: TYPES.NUMBER.OPTIONAL },
+        { foo: TYPES.BOOLEAN.OPTIONAL, bar: TYPES.NUMBER }
+    ))
+    console.log(like(    // false
+        { foo: true,                   bar: '1' },
+        { foo: TYPES.BOOLEAN,          bar: TYPES.NUMBER.OPTIONAL },
+        { foo: TYPES.BOOLEAN.OPTIONAL, bar: TYPES.NUMBER }
+    ))
+    console.log(like(    // true
+        { foo: 'foo',                 bar: [ 1 ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.ARRAY.OPTIONAL },
+        { foo: TYPES.STRING.OPTIONAL, bar: [ TYPES.NUMBER ] },
+    ))
+    console.log(like(    // true
+        { foo: 'foo',                 bar: [ '1' ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.ARRAY.OPTIONAL },
+        { foo: TYPES.STRING.OPTIONAL, bar: [ TYPES.NUMBER ] },
+    ))
+    console.log(like(    // false
+        {                             bar: [ '1' ] },
+        { foo: TYPES.STRING.NONEMPTY, bar: TYPES.ARRAY.OPTIONAL },
+        { foo: TYPES.STRING.OPTIONAL, bar: [ TYPES.NUMBER ] },
+    ))
 }()
 
 // end of assert.js
