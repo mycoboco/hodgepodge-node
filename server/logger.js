@@ -42,16 +42,18 @@ const colors = require('colors')
 //     stack:  true || false
 // }
 function create(conf) {
-    function locus(s) {
-        // assumes Console used for output
-        return (conf.level !== 'off' && process.stdout.isTTY)? s.cyan: s
-    }
-
     conf = {
         prefix: undefined,
         level:  'info',
         stack:  true,
         ...conf
+    }
+
+    const colorize = conf.level !== 'off' && process.stdout.isTTY && !conf.json
+
+    function locus(s) {
+        // assumes Console used for output
+        return (colorize)? s.cyan: `<${s}>`
     }
 
     const logger = new winston.Logger({
@@ -70,7 +72,8 @@ function create(conf) {
                 timestamp: true,
                 label:     conf.prefix,
                 level:     conf.level,
-                colorize:  process.stdout.isTTY
+                colorize,
+                json:      !!conf.json
             })
         ]: []
     })
@@ -121,7 +124,8 @@ module.exports = {
     const logger = module.exports
     const log = logger.create({
         prefix: 'test',
-        level:  'info'
+        level:  'info',
+        json:   true
     })
 
     log.info(new Error('information'))
