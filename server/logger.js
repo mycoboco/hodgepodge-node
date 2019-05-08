@@ -128,8 +128,8 @@ module.exports = {
         json:   true
     })
 
-    log.info(new Error('information'))
-    log.warning(new Error('warning'))
+    log.info('information')
+    log.warning('warning')
     log.error(new Error('error'))
 }()
 
