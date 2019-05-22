@@ -50,17 +50,27 @@ function frame(p, trims, cb) {
         '-y', '/dev/null'
     )
 
-    execf(path.join(dir.ffmpeg, 'ffmpeg'), opts, (err, stdout, stderr) => {
-        let nframe = /frame=\s*([0-9]+)/
-
-        if (err) {
-            cb(err)
+    let stderr = ''
+    const ffmpeg = spawn(path.join(dir.ffmpeg, 'ffmpeg'), opts, {
+        stdio: [ 'ignore', 'ignore', 'pipe' ]
+    })
+    ffmpeg.on('exit', (code, signal) => {
+        if (code !== 0 || signal) {
+            cb(new Error(`failed to get frame # with options: ${opts}`))
             return
         }
 
+        let nframe = /frame=\s*([0-9]+)/
         nframe = nframe.exec(stderr)
         if (nframe) nframe = +nframe[1]
         cb(null, nframe)
+    })
+    .on('error', cb)
+    ffmpeg.stderr.on('data', data => {
+        stderr += data
+        if (stderr.indexOf('frame=') < 0) {
+            stderr = stderr.substring(stderr.lastIndexOf('\n') + 1)
+        }
     })
 }
 
@@ -206,7 +216,8 @@ function drive(t, opts, progress) {
             }
 
             resolve(t)
-        }).on('error', err => {
+        })
+        .on('error', err => {
             reject(err)
         })
 
