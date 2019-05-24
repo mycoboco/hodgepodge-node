@@ -41,12 +41,12 @@ module.exports = mongoose => {
             keepAlive:         1,
             socketTimeoutMS:   0
         })
-        .on('connected', () => log.info(`connected to ${url}`))
+        .on('connected', () => log.info(`connected to ${hide(url)}`))
         .on('error', err => {
             log.error(err)
             db && db.close()
         })
-        .on('reconnected', () => log.warning(`reconnected to ${url}`))
+        .on('reconnected', () => log.warning(`reconnected to ${hide(url)}`))
         .then(_db => {
             db = _db
             cb(null, _db)

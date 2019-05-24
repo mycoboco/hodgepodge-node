@@ -34,7 +34,7 @@ module.exports = () => {
         conn
             .authenticate()
             .then(() => {
-                log.info(`connected to ${url}`)
+                log.info(`connected to ${hide(url)}`)
                 cb(null, conn)
             })
             .catch(err => {
