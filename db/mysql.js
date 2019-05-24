@@ -4,6 +4,8 @@
 
 const Sequelize = require('sequelize')
 
+const hide = require('./hide')
+
 
 module.exports = () => {
     let conn, log
@@ -24,7 +26,7 @@ module.exports = () => {
         if (conf.user && conf.password) url += `${conf.user}:${conf.password}@`
         url += `${conf.host}:${conf.port}/${conf.db}`
 
-        log.info(`connecting to ${url}`)
+        log.info(`connecting to ${hide(url)}`)
 
         conn = new Sequelize(url, {
             query: { raw: true }

@@ -2,6 +2,8 @@
  *  connects to or disconnects from MongoDB
  */
 
+const hide = require('./hide')
+
 
 module.exports = mongoose => {
     let db, log
@@ -30,7 +32,7 @@ module.exports = mongoose => {
         url += `/${conf.db}`
         if (conf.replicaSet) url += `?replicaSet=${conf.replicaSet}`
 
-        log.info(`connecting to ${url}`)
+        log.info(`connecting to ${hide(url)}`)
 
         mongoose.createConnection(url, {
             useMongoClient:    true,
