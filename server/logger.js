@@ -73,7 +73,8 @@ function create(conf) {
                 label:     conf.prefix,
                 level:     conf.level,
                 colorize,
-                json:      !!conf.json
+                json:      !!conf.json,
+                ...((conf.json)? { stringify: obj => JSON.stringify(obj) }: {})
             })
         ]: []
     })
