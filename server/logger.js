@@ -126,12 +126,12 @@ module.exports = {
     const log = logger.create({
         prefix: 'test',
         level:  'info',
-        json:   true
+        json:   !true
     })
 
     log.info('information')
     log.warning('warning')
-    log.error(new Error('error'))
+    log.error(new Error('error'), { nested: { foo: 'bar' }})
 }()
 
 // end of logger.js
