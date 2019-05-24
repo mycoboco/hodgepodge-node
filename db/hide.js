@@ -26,7 +26,16 @@ module.exports = (url = '') => {
     console.log(hide('foo1!:bar1!@example.com'))            // foo1!:???@example.com
     console.log(hide(':bar1!@example.com'))                 // invalid url
     console.log(hide('foo1!@example.com'))                  // foo1!@example.com
+    console.log(hide('@example.com'))                       // invalid url
     console.log(hide('example.com'))                        // example.com
+    console.log(hide('mongodb://foo1!:bar1!@host1.com:1111,host2.com:2222/database'))
+        // mongodb://foo1!:???@host1.com:1111,host2.com:2222/databse
+    console.log(hide('foo1!:bar1!@host1.com:1111,host2.com:2222/database'))
+        // foo1!:???@host1.com:1111,host2.com:2222/databse
+    console.log(hide('foo1!@host1.com:1111,host2.com:2222/database'))
+        // foo1!@host1.com:1111,host2.com:2222/databse
+    console.log(hide('host1.com:1111,host2.com:2222/database'))
+        // host1.com:1111,host2.com:2222/databse
 }()
 
 // end of hide.js
