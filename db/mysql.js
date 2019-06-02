@@ -29,7 +29,8 @@ module.exports = () => {
         log.info(`connecting to ${hide(url)}`)
 
         conn = new Sequelize(url, {
-            query: { raw: true }
+            query: { raw: true },
+            ...conf.option
         })
         conn
             .authenticate()

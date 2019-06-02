@@ -39,7 +39,8 @@ module.exports = mongoose => {
             autoReconnect:     true,
             reconnectInterval: conf.reconnectTime*1000,
             keepAlive:         1,
-            socketTimeoutMS:   0
+            socketTimeoutMS:   0,
+            ...conf.option
         })
         .on('connected', () => log.info(`connected to ${hide(url)}`))
         .on('error', err => {
