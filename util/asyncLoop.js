@@ -16,12 +16,12 @@ module.exports = (iter, func, cb = () => {}) => {
                 setImmediate(func.bind(null, loop, idx++))
             } else {
                 done = true
-                cb()
+                cb(iter)
             }
         },
         break: () => {
             done = true
-            cb()
+            cb(idx - 1)
         }
     }
 
@@ -40,7 +40,7 @@ module.exports = (iter, func, cb = () => {}) => {
             if (x == 10) loop.break()
             else loop.next()
         },
-        () => console.log('done')
+        (idx) => console.log(`done: ${idx}`)
     )
 }()
 
