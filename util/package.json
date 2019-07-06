@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/util",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "a hodgepodge of utility modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
@@ -23,7 +23,8 @@
   },
   "devDependencies": {},
   "engines": { "node": ">=6.4.0" },
-  "keywords": [ "node.js server", "helper", "library",
+  "keywords": [
+    "node.js server", "helper", "library",
     "utils"
   ]
 }
