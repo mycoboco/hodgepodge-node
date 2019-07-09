@@ -211,6 +211,9 @@ function drive(t, opts, progress) {
             const prog = /time=([0-9]+:[0-9]+:[0-9\.]+)/.exec(data.toString())
             prog && progress(secsFromString(prog[1]))
         })
+        .on('error', () => {
+            // ignore errors expecting abnormal exit
+        })
     })
 }
 
