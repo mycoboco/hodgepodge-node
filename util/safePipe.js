@@ -3,18 +3,19 @@
  *      see https://github.com/nodejs/node/issues/25335
  */
 
-const domain = require('domain')
 
+module.exports = (rs, ws, _handler) => {
+    const handler = err => {
+        rs.unpipe(ws)
+        ws.end()
+        _handler && _handler(err)
+    }
 
-module.exports = (rs, ws, err) => {
-    const d = domain.create()
-    d.on('error', err || (() => {}))
-    d.run(() => {
-        ws.on('unpipe', () => rs.once('readable', () => rs.destroy()))
-        ws.on('error', () => rs.unpipe(ws))
-          .on('close', () => rs.unpipe(ws))
-        rs.pipe(ws)
-    })
+    ws.on('unpipe', () => rs.once('readable', () => rs.destroy()))
+    ws.on('error', handler)
+      .on('close', () => rs.unpipe(ws))
+    rs.on('error', handler)
+    rs.pipe(ws)
 }
 
 // end of safePipe.js
