@@ -33,8 +33,7 @@ function serve(
         }, (err, result) => {
             if (err) {
                 log.error(err)
-                next()
-                return
+                return next()
             }
             res.header('Content-type', 'text/css')
                .send(result.css)
@@ -46,8 +45,7 @@ function serve(
 
 function filter(req, res, next) {
     if (/(?:.*\/|^)\+[^/]+\.scss$/.test(req.path)) {    // blocks +foo.scss
-        res.sendStatus(404)
-        return
+        return res.sendStatus(404)
     }
     next()
 }

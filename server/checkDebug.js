@@ -9,10 +9,7 @@ module.exports = (debug) => {
     }
 
     return function (req, res, next) {
-        if (debug) {
-            next()
-            return
-        }
+        if (debug) return next()
 
         res.send(404)
     }

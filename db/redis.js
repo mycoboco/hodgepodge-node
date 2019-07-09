@@ -20,16 +20,10 @@ module.exports = () => {
 
     function connect(conf, cb) {
         function selectDb(err) {
-            if (err) {
-                cb(err)
-                return
-            }
+            if (err) return cb(err)
 
             log.info(`selecting db #${conf.db}`)
-            if (conf.db) {
-                client.select(conf.db, cb)
-                return
-            }
+            if (conf.db) return client.select(conf.db, cb)
             cb(err)
         }
 

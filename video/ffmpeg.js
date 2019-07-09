@@ -56,8 +56,7 @@ function frame(p, trims, cb) {
     })
     ffmpeg.on('exit', (code, signal) => {
         if (code !== 0 || signal) {
-            cb(new Error(`failed to get frame # with options: ${opts}`))
-            return
+            return cb(new Error(`failed to get frame # with options: ${opts}`))
         }
 
         let nframe = /frame=\s*([0-9]+)/
@@ -93,10 +92,7 @@ function probe(ps) {
                     ]
 
                     execf(path.join(dir.ffprobe, 'ffprobe'), opts, (err, stdout, stderr) => {
-                        if (err) {
-                            callback(err)
-                            return
-                        }
+                        if (err) return callback(err)
 
                         const nframe = /nb_frames=([0-9]+)/.exec(stdout)
                         if (nframe) info.nframe = +nframe[1]
@@ -145,10 +141,7 @@ function probe(ps) {
                         if ((mime.getType(p) || '').indexOf('video/') === 0 &&
                             !isFinite(info.nframe)) {
                             frame(p, (err, f) => {
-                                if (err) {
-                                    callback(err)
-                                    return
-                                }
+                                if (err) return callback(err)
 
                                 info.nframe = f
                                 callback()
@@ -168,10 +161,7 @@ function probe(ps) {
                     ]
 
                     execf(path.join(dir.ffprobe, 'ffprobe'), opts, (err, stdout, stderr) => {
-                        if (err) {
-                            callback(err)
-                            return
-                        }
+                        if (err) return callback(err)
 
                         let audio = /\[STREAM\]\s+index=/.exec(stdout)
                         if (audio) info.audio = true
@@ -180,10 +170,7 @@ function probe(ps) {
                     })
                 }
             ], err => {
-                if (err) {
-                    reject(err)
-                    return
-                }
+                if (err) return reject(err)
 
                 resolve(info)
             })
@@ -211,8 +198,7 @@ function drive(t, opts, progress) {
         })
         ffmpeg.on('exit', (code, signal) => {
             if (code !== 0 || signal) {
-                reject(new Error(`failed to process video with options: ${opts}`))
-                return
+                return reject(new Error(`failed to process video with options: ${opts}`))
             }
 
             resolve(t)
@@ -590,10 +576,7 @@ function preview(s, t, opt) {
             if (typeof number === 'number' && opt.trims &&
                 (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
                 frame(s, opt.trims, (err, f) => {    // counts # of frames of trimmed one
-                    if (err) {
-                        reject(err)
-                        return
-                    }
+                    if (err) return reject(err)
 
                     perform(f)
                 })

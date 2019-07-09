@@ -44,8 +44,7 @@ function serve(
 
 function filter(req, res, next) {
     if (/(?:.*\/|^)\+[^/]+\.js$/.test(req.path)) {    // blocks +foo.js
-        res.sendStatus(404)
-        return
+        return res.sendStatus(404)
     }
     next()
 }
