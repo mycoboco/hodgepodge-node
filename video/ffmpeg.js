@@ -294,7 +294,6 @@ function copy(s, t, opt, progress) {
                     drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
                                                    info[0].duration, progress))
                         .then(resolve)
-                        .catch(reject)
                 })
                 .catch(reject)
         })
@@ -332,7 +331,6 @@ function compress(s, t, opt, progress) {
                     drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
                                                    info[0].duration, progress))
                         .then(resolve)
-                        .catch(reject)
                 })
                 .catch(reject)
         })
@@ -435,7 +433,6 @@ function playrate(s, t, opt, progress) {
                                                    (trims && trims[1]) / playrate,
                                                    info[0].duration / playrate, progress))
                         .then(resolve)
-                        .catch(reject)
                 })
                 .catch(reject)
         })
@@ -543,9 +540,7 @@ function preview(s, t, opt) {
                                                       Math.ceil(number / info[0].fps)
                                         ], { crf: 18 }, [ 'crf' ], [
                                             '-filter_complex', '[0:v][1]concat'
-                                        ]))
-                                            .then(resolve)
-                                            .catch(reject)
+                                        ])).then(resolve)
                                     })
                                 }).bind(null, s)
                                 s = tmp
@@ -650,7 +645,6 @@ function watermark(s, o, t, opt, progress) {
                     drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
                                                    info[0].duration, progress))
                         .then(resolve)
-                        .catch(reject)
                 })
                 .catch(reject)
         })
@@ -792,7 +786,6 @@ function blur(s, t, opt, progress) {
                 drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
                                                info[0].duration, progress))
                     .then(resolve)
-                    .catch(reject)
             })
             .catch(reject)
     })
@@ -837,7 +830,6 @@ function landscape(s, t, opt, progress) {
                 drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
                                                info[0].duration, progress))
                     .then(resolve)
-                    .catch(reject)
             })
             .catch(reject)
     })
@@ -884,7 +876,6 @@ function amix(s, a, t, opt, progress) {
 
                 drive(t, opts, progressHandler(null, null, infos[0].duration, progress))
                     .then(resolve)
-                    .catch(reject)
             })
             .catch(reject)
     })
