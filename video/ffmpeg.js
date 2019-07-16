@@ -291,9 +291,12 @@ function copy(s, t, opt, progress) {
         return new Promise((resolve, reject) => {
             probe(s)
                 .then(info => {
-                    drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                   info[0].duration, progress))
-                        .then(resolve)
+                    drive(
+                        t, opts,
+                        progressHandler(
+                            trims && trims[0], trims && trims[1], info[0].duration, progress
+                        )
+                    ).then(resolve)
                 })
                 .catch(reject)
         })
@@ -328,9 +331,12 @@ function compress(s, t, opt, progress) {
         return new Promise((resolve, reject) => {
             probe(s)
                 .then(info => {
-                    drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                   info[0].duration, progress))
-                        .then(resolve)
+                    drive(
+                        t, opts,
+                        progressHandler(
+                            trims && trims[0], trims && trims[1], info[0].duration, progress
+                        )
+                    ).then(resolve)
                 })
                 .catch(reject)
         })
@@ -429,10 +435,15 @@ function playrate(s, t, opt, progress) {
         return new Promise((resolve, reject) => {
             probe(s)
                 .then(info => {
-                    drive(t, opts, progressHandler((trims && trims[0]) / playrate,
-                                                   (trims && trims[1]) / playrate,
-                                                   info[0].duration / playrate, progress))
-                        .then(resolve)
+                    drive(
+                        t, opts,
+                        progressHandler(
+                            (trims && trims[0]) / playrate,
+                            (trims && trims[1]) / playrate,
+                            info[0].duration / playrate,
+                            progress
+                        )
+                    ).then(resolve)
                 })
                 .catch(reject)
         })
@@ -642,9 +653,12 @@ function watermark(s, o, t, opt, progress) {
         return new Promise((resolve, reject) => {
             probe(s)
                 .then(info => {
-                    drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                                   info[0].duration, progress))
-                        .then(resolve)
+                    drive(
+                        t, opts,
+                        progressHandler(
+                            trims && trims[0], trims && trims[1], info[0].duration, progress
+                        )
+                    ).then(resolve)
                 })
                 .catch(reject)
         })
@@ -783,9 +797,12 @@ function blur(s, t, opt, progress) {
                     '-vcodec', 'libx264'
                 ])
 
-                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                               info[0].duration, progress))
-                    .then(resolve)
+                drive(
+                    t, opts,
+                    progressHandler(
+                        trims && trims[0], trims && trims[1], info[0].duration, progress
+                    )
+                ).then(resolve)
             })
             .catch(reject)
     })
@@ -827,9 +844,12 @@ function landscape(s, t, opt, progress) {
                                `${(opt.type === 'blur')? '': `:color=${opt.type}`}`
                 ])
 
-                drive(t, opts, progressHandler(trims && trims[0], trims && trims[1],
-                                               info[0].duration, progress))
-                    .then(resolve)
+                drive(
+                    t, opts,
+                    progressHandler(
+                        trims && trims[0], trims && trims[1], info[0].duration, progress
+                    )
+                ).then(resolve)
             })
             .catch(reject)
     })
