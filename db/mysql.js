@@ -32,8 +32,7 @@ module.exports = () => {
             query: { raw: true },
             ...conf.option
         })
-        conn
-            .authenticate()
+        conn.authenticate()
             .then(() => {
                 log.info(`connected to ${hide(url)}`)
                 cb(null, conn)
@@ -45,16 +44,15 @@ module.exports = () => {
 
     function sync(cb) {
         conn.sync()
-        .then(() => cb())
-        .catch(cb)
+            .then(() => cb())
+            .catch(cb)
     }
 
     function close(cb = () => {}) {
        if (!conn) return
 
        log.info('closing mysql connection')
-       conn
-           .close()
+       conn.close()
            .catch(err => log.error(err))
     }
 
