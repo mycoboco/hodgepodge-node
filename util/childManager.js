@@ -15,6 +15,8 @@ function add(child) {
         handler
     })
     child.once('exit', handler)
+
+    return child
 }
 
 
@@ -23,6 +25,8 @@ function remove(child) {
     if (i < 0) return
     debug && console.log(`removing ${child.pid}`)
     childs.splice(i, 1)
+
+    return child
 }
 
 
