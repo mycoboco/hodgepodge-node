@@ -11,12 +11,12 @@ const async = require('async')
 const mime = require('mime')
 
 
-let dir, log
+let dir, log, childManager
 const temps = []
 const ncpu = os.cpus().length
 
 
-function init(_dir, _log = { warning: () => {} }) {
+function init(_dir, _log, _childManager) {
     if (typeof _dir === 'string') {
         _dir = {
             ffmpeg:  _dir,
@@ -24,7 +24,8 @@ function init(_dir, _log = { warning: () => {} }) {
         }
     }
     dir = _dir
-    log = _log
+    log = _log || { warning: () => {} }
+    childManager = _childManager || { add: x => x }
 }
 
 
@@ -51,9 +52,9 @@ function frame(p, trims, cb) {
     )
 
     let stderr = ''
-    const ffmpeg = spawn(path.join(dir.ffmpeg, 'ffmpeg'), opts, {
+    childManager.add(spawn(path.join(dir.ffmpeg, 'ffmpeg'), opts, {
         stdio: [ 'ignore', 'ignore', 'pipe' ]
-    })
+    }))
         .on('exit', (code, signal) => {
             if (code !== 0 || signal) {
                 return cb(new Error(`failed to get frame # with options: ${opts}`))
@@ -91,6 +92,7 @@ function probe(ps) {
                         p
                     ]
 
+                    // unnecessary to manage by childManager
                     execf(path.join(dir.ffprobe, 'ffprobe'), opts, (err, stdout, stderr) => {
                         if (err) return callback(err)
 
@@ -192,10 +194,10 @@ function drive(t, opts, progress) {
     ]
 
     return new Promise((resolve, reject) => {
-        const ffmpeg = spawn(path.join(dir.ffmpeg, 'ffmpeg'), opts, {
+        const ffmpeg = childManager.add(spawn(path.join(dir.ffmpeg, 'ffmpeg'), opts, {
             stdio: (progress)? [ 'ignore', 'ignore', 'pipe' ]:
                                'ignore'    // to avoid hanging
-        })
+        }))
 
         ffmpeg
             .on('exit', (code, signal) => {
