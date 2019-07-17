@@ -869,12 +869,18 @@ module.exports = {
 
 !true && !function () {
     const path = require('path')
+    const childManager = require('../util/childManager')
     const ffmpeg = module.exports
     const test = path.join('.', 'test', 'sample.mp4')
     const watermark = path.join('.', 'test', 'watermark.png')
     const audio = path.join('.', 'test', 'sample.mp3')
 
-    ffmpeg.init('/usr/bin')
+    process.on('SIGINT', () => {
+        childManager.clean()
+        setTimeout(() => process.exit(), 10*1000)
+    })
+
+    ffmpeg.init('/usr/bin', null, childManager)
     ffmpeg.probe(test)
         .then(infos => console.log(infos))
         .catch(err => console.log(err))
