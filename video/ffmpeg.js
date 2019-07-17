@@ -78,106 +78,104 @@ function frame(p, trims, cb) {
 function probe(ps) {
     ps = (Array.isArray(ps))? ps: [ ps ]
 
-    ps = ps.map(p => {
-        return new Promise((resolve, reject) => {
-            const info = {}
+    ps = ps.map(p => new Promise((resolve, reject) => {
+        const info = {}
 
-            async.parallel([
-                callback => {
-                    const opts = [
-                        '-probesize', '2147483647',
-                        '-analyzeduration', '2147483647',
-                        '-select_streams', 'v',
-                        '-show_streams',
-                        p
-                    ]
+        async.parallel([
+            callback => {
+                const opts = [
+                    '-probesize', '2147483647',
+                    '-analyzeduration', '2147483647',
+                    '-select_streams', 'v',
+                    '-show_streams',
+                    p
+                ]
 
-                    // unnecessary to manage by childManager
-                    execf(path.join(dir.ffprobe, 'ffprobe'), opts, (err, stdout, stderr) => {
-                        if (err) return callback(err)
+                // unnecessary to manage by childManager
+                execf(path.join(dir.ffprobe, 'ffprobe'), opts, (err, stdout, stderr) => {
+                    if (err) return callback(err)
 
-                        const nframe = /nb_frames=([0-9]+)/.exec(stdout)
-                        if (nframe) info.nframe = +nframe[1]
+                    const nframe = /nb_frames=([0-9]+)/.exec(stdout)
+                    if (nframe) info.nframe = +nframe[1]
 
-                        const width = /[^_]width=([0-9]+)/.exec(stdout)
-                        if (width) info.width = +width[1]
-                        const height = /[^_]height=([0-9]+)/.exec(stdout)
-                        if (height) info.height = +height[1]
+                    const width = /[^_]width=([0-9]+)/.exec(stdout)
+                    if (width) info.width = +width[1]
+                    const height = /[^_]height=([0-9]+)/.exec(stdout)
+                    if (height) info.height = +height[1]
 
-                        const dar = /display_aspect_ratio=([0-9]+:[0-9]+)/.exec(stdout)
-                        if (dar) info.dar = dar[1]
+                    const dar = /display_aspect_ratio=([0-9]+:[0-9]+)/.exec(stdout)
+                    if (dar) info.dar = dar[1]
 
-                        const fps = /,\s*([0-9.]+) fps/.exec(stderr)
-                        if (fps) info.fps = +fps[1]
+                    const fps = /,\s*([0-9.]+) fps/.exec(stderr)
+                    if (fps) info.fps = +fps[1]
 
-                        const duration = /Duration: ([0-9]+:[0-9]+:[0-9\.]+)/.exec(stderr)
-                        if (duration) info.duration = secsFromString(duration[1])
+                    const duration = /Duration: ([0-9]+:[0-9]+:[0-9\.]+)/.exec(stderr)
+                    if (duration) info.duration = secsFromString(duration[1])
 
-                        const bitrate = /bitrate: ([0-9]+) kb\/s/.exec(stderr)
-                        if (bitrate) info.bitrate = +bitrate[1]
+                    const bitrate = /bitrate: ([0-9]+) kb\/s/.exec(stderr)
+                    if (bitrate) info.bitrate = +bitrate[1]
 
-                        const date =
-                            /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+\d+))/
-                                .exec(stderr)
-                        if (date) {
-                            info.recordedAt = new Date(date[1])
-                        } else {
-                            const creationTime = new RegExp('creation_time\\s*:\\s*'+
-                                                            '(\\d{4}-\\d{2}-\\d{2}[T| ]'+
-                                                            '\\d{2}:\\d{2}:\\d{2})').exec(stderr)
-                            if (creationTime) info.recordedAt = new Date(`${creationTime[1]}Z`)
-                        }
+                    const date = /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+\d+))/
+                        .exec(stderr)
+                    if (date) {
+                        info.recordedAt = new Date(date[1])
+                    } else {
+                        const creationTime = new RegExp('creation_time\\s*:\\s*'+
+                                                        '(\\d{4}-\\d{2}-\\d{2}[T| ]'+
+                                                        '\\d{2}:\\d{2}:\\d{2})').exec(stderr)
+                        if (creationTime) info.recordedAt = new Date(`${creationTime[1]}Z`)
+                    }
 
-                        const rotate = /rotate\s*:\s*([0-9]+)/.exec(stderr)
-                        if (rotate) {
-                            info.rotate = +rotate[1]
-                            if (info.rotate === 90 || info.rotate === 270) {
-                                info.corrected = {
-                                    width:  info.height,
-                                    height: info.width
-                                }
+                    const rotate = /rotate\s*:\s*([0-9]+)/.exec(stderr)
+                    if (rotate) {
+                        info.rotate = +rotate[1]
+                        if (info.rotate === 90 || info.rotate === 270) {
+                            info.corrected = {
+                                width:  info.height,
+                                height: info.width
                             }
                         }
+                    }
 
-                        // nframe required for videos
-                        if ((mime.getType(p) || '').indexOf('video/') === 0 &&
-                            !isFinite(info.nframe)) {
-                            frame(p, (err, f) => {
-                                if (err) return callback(err)
+                    // nframe required for videos
+                    if ((mime.getType(p) || '').indexOf('video/') === 0 &&
+                        !isFinite(info.nframe)) {
+                        frame(p, (err, f) => {
+                            if (err) return callback(err)
 
-                                info.nframe = f
-                                callback()
-                            })
-                        } else {
+                            info.nframe = f
                             callback()
-                        }
-                    })
-                },
-                callback => {
-                    const opts = [
-                        '-probesize', '2147483647',
-                        '-analyzeduration', '2147483647',
-                        '-select_streams', 'a',
-                        '-show_streams',
-                        p
-                    ]
-
-                    execf(path.join(dir.ffprobe, 'ffprobe'), opts, (err, stdout, stderr) => {
-                        if (err) return callback(err)
-
-                        let audio = /\[STREAM\]\s+index=/.exec(stdout)
-                        if (audio) info.audio = true
-
+                        })
+                    } else {
                         callback()
-                    })
-                }
-            ], err => {
-                if (err) return reject(err)
+                    }
+                })
+            },
+            callback => {
+                const opts = [
+                    '-probesize', '2147483647',
+                    '-analyzeduration', '2147483647',
+                    '-select_streams', 'a',
+                    '-show_streams',
+                    p
+                ]
 
-                resolve(info)
-            })
+                // unnecessary to manage by childManager
+                execf(path.join(dir.ffprobe, 'ffprobe'), opts, (err, stdout, stderr) => {
+                    if (err) return callback(err)
+
+                    let audio = /\[STREAM\]\s+index=/.exec(stdout)
+                    if (audio) info.audio = true
+
+                    callback()
+                })
+            }
+        ], err => {
+            if (err) return reject(err)
+
+            resolve(info)
         })
-    })
+    }))
 
     return Promise.all(ps)
 }
@@ -288,18 +286,11 @@ function copy(s, t, opt, progress) {
     const opts = constructOpts([ '-i', s ], opt, accepts, [ '-vcodec', 'copy' ])
 
     if (progress) {
-        return new Promise((resolve, reject) => {
-            probe(s)
-                .then(info => {
-                    drive(
-                        t, opts,
-                        progressHandler(
-                            trims && trims[0], trims && trims[1], info[0].duration, progress
-                        )
-                    ).then(resolve)
-                })
-                .catch(reject)
-        })
+        return probe(s)
+            .then(info => drive(
+                t, opts,
+                progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress)
+            ))
     } else {
         return drive(t, opts)
     }
@@ -328,18 +319,11 @@ function compress(s, t, opt, progress) {
     ])
 
     if (progress) {
-        return new Promise((resolve, reject) => {
-            probe(s)
-                .then(info => {
-                    drive(
-                        t, opts,
-                        progressHandler(
-                            trims && trims[0], trims && trims[1], info[0].duration, progress
-                        )
-                    ).then(resolve)
-                })
-                .catch(reject)
-        })
+        return probe(s)
+            .then(info => drive(
+                t, opts,
+                progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress)
+            ))
     } else {
         return drive(t, opts)
     }
@@ -383,17 +367,16 @@ function merge(ss, t, opt, progress) {
                         let duration = 0
 
                         infos.forEach(info => duration += info.duration)
-                        drive(t, opts, progressHandler(null, null, duration, progress))
-                            .then(t => {
-                                clean()
-                                resolve(t)
-                            })
-                            .catch(err => {
-                                clean()
-                                reject(err)
-                            })
+                        return drive(t, opts, progressHandler(null, null, duration, progress))
                     })
-                    .catch(reject)
+                    .then(t => {
+                        clean()
+                        resolve(t)
+                    })
+                    .catch(err => {
+                        clean()
+                        reject(err)
+                    })
             } else {
                 drive(t, opts)
                     .then(t => {
@@ -432,21 +415,16 @@ function playrate(s, t, opt, progress) {
                                [ '-vf', `setpts=${1/opt.playrate}*PTS`, '-an' ])
 
     if (progress) {
-        return new Promise((resolve, reject) => {
-            probe(s)
-                .then(info => {
-                    drive(
-                        t, opts,
-                        progressHandler(
-                            (trims && trims[0]) / playrate,
-                            (trims && trims[1]) / playrate,
-                            info[0].duration / playrate,
-                            progress
-                        )
-                    ).then(resolve)
-                })
-                .catch(reject)
-        })
+        return probe(s)
+            .then(info => drive(
+                t, opts,
+                progressHandler(
+                    (trims && trims[0]) / playrate,
+                    (trims && trims[1]) / playrate,
+                    info[0].duration / playrate,
+                    progress
+                )
+            ))
     } else {
         return drive(t, opts)
     }
@@ -508,8 +486,8 @@ function thumbnail(s, t, opt) {
                 }
 
                 async.parallelLimit(funcs, ncpu, (err, results) => {
-                    if (err) reject(err)
-                    else resolve(results)
+                    if (err) return reject(err)
+                    resolve(results)
                 })
             })
             .catch(reject)
@@ -529,78 +507,73 @@ function preview(s, t, opt) {
     if (typeof opt.fps === 'number') fps = opt.fps
     else number = opt.number || 100
 
-    return new Promise((resolve, reject) => {
-        probe(s)
-            .then(info => {
-                let opts
+    return probe(s)
+        .then(info => {
+            let opts
 
-                function perform(nframe) {
-                    let blank = Promise.resolve.bind(Promise, null)
+            function perform(nframe) {
+                let blank = Promise.resolve.bind(Promise, null)
 
-                    if (typeof number === 'number') {
-                        fps = Math.floor(nframe / number)
-                        if (fps === 0) {
-                            fps = 1
-                            if (opt.blank) {
-                                blank = (s => {
-                                    return new Promise((resolve, reject) => {
-                                        drive(tmp, constructOpts([
-                                            '-i', s,
-                                            '-f', 'lavfi',
-                                            '-i', `color=s=${info[0].width}x${info[0].height}:d=`+
-                                                      Math.ceil(number / info[0].fps)
-                                        ], { crf: 18 }, [ 'crf' ], [
-                                            '-filter_complex', '[0:v][1]concat'
-                                        ])).then(resolve)
-                                    })
-                                }).bind(null, s)
-                                s = tmp
-                            } else {
-                                number = nframe
-                            }
+                if (typeof number === 'number') {
+                    fps = Math.floor(nframe / number)
+                    if (fps === 0) {
+                        fps = 1
+                        if (opt.blank) {
+                            blank = (s => {
+                                return drive(tmp, constructOpts([
+                                    '-i', s,
+                                    '-f', 'lavfi',
+                                    '-i', `color=s=${info[0].width}x${info[0].height}:d=`+
+                                              Math.ceil(number / info[0].fps)
+                                ], { crf: 18 }, [ 'crf' ], [
+                                    '-filter_complex', '[0:v][1]concat'
+                                ]))
+                            }).bind(null, s)
+                            s = tmp
+                        } else {
+                            number = nframe
                         }
-                        opts = constructOpts([ '-i', s ], opt, accepts, [
-                            '-frames', '1',
-                            '-vf', `select=not(mod(n\\,${fps})),scale=-1:${height},`+
-                                   `tile=${number}x1`
-                        ])
-                    } else {
-                        nframe = Math.min(((opt.trims && opt.trims[1] > 0)?
-                                               opt.trims[1]: info[0].duration),
-                                          info[0].duration)
-                        if (opt.trims && opt.trims[0] >= 0) nframe -= opt.trims[0]
-                        number = Math.max(1, Math.floor(nframe / fps))
-                        opts = constructOpts([ '-i', s ], opt, accepts, [
-                            '-frames', '1',
-                            '-vf', `fps=1/${fps},scale=-1:${height},tile=${number}x1`
-                        ])
                     }
-
-                    blank()
-                        .then(() => drive(t, opts))
-                        .then(t => {
-                            clean()
-                            resolve(t)
-                        })
-                        .catch(err => {
-                            clean()
-                            reject(err)
-                        })
-                }
-
-                if (typeof number === 'number' && opt.trims &&
-                    (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
-                    frame(s, opt.trims, (err, f) => {    // counts # of frames of trimmed one
-                        if (err) return reject(err)
-
-                        perform(f)
-                    })
+                    opts = constructOpts([ '-i', s ], opt, accepts, [
+                        '-frames', '1',
+                        '-vf', `select=not(mod(n\\,${fps})),scale=-1:${height},`+
+                               `tile=${number}x1`
+                    ])
                 } else {
-                    perform(info[0].nframe)
+                    nframe = Math.min(((opt.trims && opt.trims[1] > 0)?
+                                           opt.trims[1]: info[0].duration),
+                                      info[0].duration)
+                    if (opt.trims && opt.trims[0] >= 0) nframe -= opt.trims[0]
+                    number = Math.max(1, Math.floor(nframe / fps))
+                    opts = constructOpts([ '-i', s ], opt, accepts, [
+                        '-frames', '1',
+                        '-vf', `fps=1/${fps},scale=-1:${height},tile=${number}x1`
+                    ])
                 }
-            })
-            .catch(reject)
-    })
+
+                return blank()
+                    .then(() => drive(t, opts))
+                    .then(t => {
+                        clean()
+                        return Promise.resolve(t)
+                    })
+                    .catch(err => {
+                        clean()
+                        return Promise.reject(err)
+                    })
+            }
+
+            if (typeof number === 'number' && opt.trims &&
+                (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
+                frame(s, opt.trims, (err, f) => {    // counts # of frames of trimmed one
+                    if (err) return Promise.reject(err)
+
+                    return perform(f)
+                })
+            } else {
+                return perform(info[0].nframe)
+            }
+        })
 }
 
 
@@ -650,18 +623,11 @@ function watermark(s, o, t, opt, progress) {
     ])
 
     if (progress) {
-        return new Promise((resolve, reject) => {
-            probe(s)
-                .then(info => {
-                    drive(
-                        t, opts,
-                        progressHandler(
-                            trims && trims[0], trims && trims[1], info[0].duration, progress
-                        )
-                    ).then(resolve)
-                })
-                .catch(reject)
-        })
+        return probe(s)
+            .then(info => drive(
+                t, opts,
+                progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress)
+            ))
     } else {
         return drive(t, opts)
     }
@@ -705,45 +671,41 @@ function vidstab(s, t, opt, progress) {
 
 
     function perform(info) {
-        return new Promise((resolve, reject) => {
-            const _opts = []
-            if (trims && trims[0] >= 0) _opts.push('-ss', trims[0])
-            _opts.push('-i', s)
-            if (trims && trims[1] > 0) _opts.push('-t', trims[1]-trims[0])
-            _opts.push(
-                '-vf', `vidstabdetect=result=${trf}${opt2str(detect)}`,
-                '-f', 'null',
+        const _opts = []
+        if (trims && trims[0] >= 0) _opts.push('-ss', trims[0])
+        _opts.push('-i', s)
+        if (trims && trims[1] > 0) _opts.push('-t', trims[1]-trims[0])
+        _opts.push(
+            '-vf', `vidstabdetect=result=${trf}${opt2str(detect)}`,
+            '-f', 'null',
+        )
+
+        return drive(
+            '-', _opts,
+            info && progressHandler(
+                trims && trims[0], trims && trims[1], info[0].duration, p => progress(p/2)
             )
-
-            drive('-', _opts, info && progressHandler(trims && trims[0], trims && trims[1],
-                                                      info[0].duration,
-                                                      p => progress(p/2)))
-                .then(() => {
-                    drive(t, opts, info && progressHandler(trims && trims[0], trims && trims[1],
-                                                           info[0].duration,
-                                                           p => progress(0.5+p/2)))
-                        .then(t => {
-                            clean()
-                            resolve(t)
-                        })
-                })
-                .catch(err => {
-                    clean()
-                    reject(err)
-                })
-        })
+        )
+            .then(() => drive(
+                t, opts,
+                info && progressHandler(
+                    trims && trims[0],
+                    trims && trims[1],
+                    info[0].duration,
+                    p => progress(0.5+p/2)
+                )
+            ))
+            .then(t => {
+                clean()
+                return Promise.resolve(t)
+            })
+            .catch(err => {
+                clean()
+                return Promise.reject(err)
+            })
     }
 
-    if (progress) {
-        return new Promise((resolve, reject) => {
-            probe(s)
-                .then(perform)
-                .then(resolve)
-                .catch(reject)
-        })
-    } else {
-        return perform()
-    }
+    return (progress)? probe(s).then(perform): perform()
 }
 
 
@@ -787,25 +749,20 @@ function blur(s, t, opt, progress) {
         ...opt
     }
 
-    return new Promise((resolve, reject) => {
-        probe(s)
-            .then(info => {
-                const trims = opt.trims
-                const opts = constructOpts([ '-i', s ], opt, accepts, [
-                    '-filter_complex', opt2str(opt.type, opt.blurs, info),
-                    '-map', `[ovr${opt.blurs.length-1}]`,
-                    '-vcodec', 'libx264'
-                ])
+    return probe(s)
+        .then(info => {
+            const trims = opt.trims
+            const opts = constructOpts([ '-i', s ], opt, accepts, [
+                '-filter_complex', opt2str(opt.type, opt.blurs, info),
+                '-map', `[ovr${opt.blurs.length-1}]`,
+                '-vcodec', 'libx264'
+            ])
 
-                drive(
-                    t, opts,
-                    progressHandler(
-                        trims && trims[0], trims && trims[1], info[0].duration, progress
-                    )
-                ).then(resolve)
-            })
-            .catch(reject)
-    })
+            return drive(
+                t, opts,
+                progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress)
+            )
+        })
 }
 
 
@@ -831,28 +788,23 @@ function landscape(s, t, opt, progress) {
     if (!w) w = 1920, h = 1080
     else h = +w[2], w = +w[1]
 
-    return new Promise((resolve, reject) => {
-        probe(s)
-            .then(info => {
-                const trims = opt.trims
-                const opts = constructOpts([ '-i', s ], opt, accepts, (opt.type === 'blur')? [
-                    '-lavfi', `[0:v]scale=ih*${w}/${h}:-1,boxblur=luma_radius=min(h\\,w)/20:`+
-                              `luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];`+
-                              `[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*${h}/${w}`
-                ]: [
-                    '-vf', `pad=ih*${w}/${h}:ih:(ow-iw)/2:(oh-ih)/2`+
-                               `${(opt.type === 'blur')? '': `:color=${opt.type}`}`
-                ])
+    return probe(s)
+        .then(info => {
+            const trims = opt.trims
+            const opts = constructOpts([ '-i', s ], opt, accepts, (opt.type === 'blur')? [
+                '-lavfi', `[0:v]scale=ih*${w}/${h}:-1,boxblur=luma_radius=min(h\\,w)/20:`+
+                          `luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];`+
+                          `[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*${h}/${w}`
+            ]: [
+                '-vf', `pad=ih*${w}/${h}:ih:(ow-iw)/2:(oh-ih)/2`+
+                           `${(opt.type === 'blur')? '': `:color=${opt.type}`}`
+            ])
 
-                drive(
-                    t, opts,
-                    progressHandler(
-                        trims && trims[0], trims && trims[1], info[0].duration, progress
-                    )
-                ).then(resolve)
-            })
-            .catch(reject)
-    })
+            return drive(
+                t, opts,
+                progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress)
+            )
+        })
 }
 
 
@@ -864,41 +816,37 @@ function amix(s, a, t, opt, progress) {
         ...opt
     }
 
-    return new Promise((resolve, reject) => {
-        probe([ s, a ])
-            .then(infos => {
-                let opts
+    return probe([ s, a ])
+        .then(infos => {
+            let opts
 
-                let mix = `amovie=${a}`
-                if (infos[0].duration > infos[1].duration) {
-                    mix += `:loop=${Math.ceil(infos[0].duration / infos[1].duration)}`
-                }
-                mix += '[s];'+
-                       `[s]volume=${opt.volumes[1]}[a1]`
+            let mix = `amovie=${a}`
+            if (infos[0].duration > infos[1].duration) {
+                mix += `:loop=${Math.ceil(infos[0].duration / infos[1].duration)}`
+            }
+            mix += '[s];'+
+                   `[s]volume=${opt.volumes[1]}[a1]`
 
-                if (infos[0].audio) {
-                    mix += `;[0:a]volume=${opt.volumes[0]}[a0];`+
-                            '[a0][a1]amix=duration=shortest[a]'
+            if (infos[0].audio) {
+                mix += `;[0:a]volume=${opt.volumes[0]}[a0];`+
+                        '[a0][a1]amix=duration=shortest[a]'
 
-                    opts = constructOpts([ '-i', s ], opt, accepts, [
-                        '-filter_complex', mix,
-                        '-map', '0:v', '-map', '[a]',
-                        '-c:v', 'copy', '-c:a', 'aac',
-                    ])
-                } else {
-                    opts = constructOpts([ '-i', s ], opt, accepts, [
-                        '-filter_complex', mix,
-                        '-map', '0:v', '-map', '[a1]',
-                        '-c:v', 'copy', '-c:a', 'aac',
-                        '-shortest'
-                    ])
-                }
+                opts = constructOpts([ '-i', s ], opt, accepts, [
+                    '-filter_complex', mix,
+                    '-map', '0:v', '-map', '[a]',
+                    '-c:v', 'copy', '-c:a', 'aac',
+                ])
+            } else {
+                opts = constructOpts([ '-i', s ], opt, accepts, [
+                    '-filter_complex', mix,
+                    '-map', '0:v', '-map', '[a1]',
+                    '-c:v', 'copy', '-c:a', 'aac',
+                    '-shortest'
+                ])
+            }
 
-                drive(t, opts, progressHandler(null, null, infos[0].duration, progress))
-                    .then(resolve)
-            })
-            .catch(reject)
-    })
+            return drive(t, opts, progressHandler(null, null, infos[0].duration, progress))
+        })
 }
 
 
