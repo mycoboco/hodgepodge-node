@@ -910,6 +910,10 @@ module.exports = {
         })
         .then(t => {
             console.log(t)
+            return ffmpeg.preview(test, 'sample-trim-prv.jpg', { number: 10, trims: [ 0, 3 ] })
+        })
+        .then(t => {
+            console.log(t)
             return ffmpeg.watermark(test, watermark, 'sample-wm.mp4', { margins: [ 10, 10 ] },
                                     p => console.log(`watermark: ${p}`))
         })
