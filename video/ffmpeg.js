@@ -353,7 +353,7 @@ function merge(ss, t, opt, progress) {
 
     return new Promise((resolve, reject) => {
         fs.writeFile(listFile, list, err => {
-            if (err) return Promise.reject(err)
+            if (err) return reject(err)
 
             const opts = constructOpts([
                 '-f',    'concat',
@@ -565,10 +565,14 @@ function preview(s, t, opt) {
 
             if (typeof number === 'number' && opt.trims &&
                 (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
-                frame(s, opt.trims, (err, f) => {    // counts # of frames of trimmed one
-                    if (err) return Promise.reject(err)
+                return new Promise((resolve, reject) => {
+                    frame(s, opt.trims, (err, f) => {    // counts # of frames of trimmed one
+                        if (err) return reject(err)
 
-                    return perform(f)
+                        perform(f)
+                            .then(resolve)
+                            .catch(reject)
+                    })
                 })
             } else {
                 return perform(info[0].nframe)
