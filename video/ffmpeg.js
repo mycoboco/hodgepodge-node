@@ -282,7 +282,7 @@ function copy(s, t, opt, progress) {
         ...opt
     }
 
-    const trims = opt.trims
+    const { trims } = opt
     const opts = constructOpts([ '-i', s ], opt, accepts, [ '-vcodec', 'copy' ])
 
     if (progress) {
@@ -313,7 +313,7 @@ function compress(s, t, opt, progress) {
         ...opt
     }
 
-    const trims = opt.trims
+    const { trims } = opt
     const opts = constructOpts([ '-i', s ], opt, accepts, [
         '-vcodec', 'libx264'
     ])
@@ -409,8 +409,7 @@ function playrate(s, t, opt, progress) {
         ...opt
     }
 
-    const playrate = opt.playrate
-    const trims = opt.trims
+    const { playrate, trims } = opt
     const opts = constructOpts([ '-i', s ], opt, accepts,
                                [ '-vf', `setpts=${1/opt.playrate}*PTS`, '-an' ])
 
@@ -621,7 +620,7 @@ function watermark(s, o, t, opt, progress) {
             break
     }
 
-    const trims = opt.trims
+    const { trims } = opt
     const opts = constructOpts([ '-i', s, '-i', o ], opt, accepts, [
         '-filter_complex', overlay
     ])
@@ -665,8 +664,7 @@ function vidstab(s, t, opt, progress) {
         ...opt
     }
 
-    const detect = opt.detect
-    const trims = opt.trims
+    const { detect, trims } = opt
     const opts = constructOpts([ '-i', s ], opt, accepts, [
         '-vf', `vidstabtransform=input=${trf}${opt2str(opt.transform)},unsharp=`+
                    (opt.unsharp || '5:5:0.8:3:3:0.4'),
@@ -755,7 +753,7 @@ function blur(s, t, opt, progress) {
 
     return probe(s)
         .then(info => {
-            const trims = opt.trims
+            const { trims } = opt
             const opts = constructOpts([ '-i', s ], opt, accepts, [
                 '-filter_complex', opt2str(opt.type, opt.blurs, info),
                 '-map', `[ovr${opt.blurs.length-1}]`,
@@ -794,7 +792,7 @@ function landscape(s, t, opt, progress) {
 
     return probe(s)
         .then(info => {
-            const trims = opt.trims
+            const { trims } = opt
             const opts = constructOpts([ '-i', s ], opt, accepts, (opt.type === 'blur')? [
                 '-lavfi', `[0:v]scale=ih*${w}/${h}:-1,boxblur=luma_radius=min(h\\,w)/20:`+
                           `luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];`+
