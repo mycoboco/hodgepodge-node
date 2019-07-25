@@ -109,6 +109,9 @@ function probe(ps) {
                     const fps = /,\s*([0-9.]+) fps/.exec(stderr)
                     if (fps) info.fps = +fps[1]
 
+                    const tbr = /,\s*([0-9.]+) tbr/.exec(stderr)
+                    if (tbr) info.tbr = +tbr[1]
+
                     const duration = /Duration: ([0-9]+:[0-9]+:[0-9\.]+)/.exec(stderr)
                     if (duration) info.duration = secsFromString(duration[1])
 
