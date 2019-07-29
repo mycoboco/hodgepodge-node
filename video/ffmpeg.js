@@ -247,7 +247,9 @@ function constructOpts(input, _opt, accepts, cmds) {
     // opt.playrate goes into cmds
     if (cmds) opts = [ ...opts, ...cmds ]
     if (isFinite(+opt.crf)) opts.push('-crf', opt.crf)
-    if (isFinite(+opt.vbv)) opts.push('-maxrate', `${+opt.vbv}M`, '-bufsize', `${+opt.vbv*2}M`)
+    else if (isFinite(+opt.vbv)) {
+        opts.push('-maxrate', `${+opt.vbv}M`, '-bufsize', `${+opt.vbv*2}M`)
+    }
 
     if (opt.quality) opts.push('-q:v', `${Math.max(2, Math.min(opt.quality, 31))}`)
     if (opt.resolution) opts.push('-s', opt.resolution)
