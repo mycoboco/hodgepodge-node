@@ -228,6 +228,12 @@ function constructOpts(input, _opt, accepts, cmds) {
     const opt = {}
     let opts = []
 
+    function addToVf(vf) {
+        const idx = opts.findIndex(o => o === '-vf') + 1
+        if (!idx) opts.push('-vf', vf)
+        else opts[idx] += `,${vf}`
+    }
+
     accepts.forEach(key => {
         if (typeof _opt[key] !== 'undefined') opt[key] = _opt[key]
         delete _opt[key]
@@ -253,7 +259,15 @@ function constructOpts(input, _opt, accepts, cmds) {
 
     if (opt.quality) opts.push('-q:v', `${Math.max(2, Math.min(opt.quality, 31))}`)
     if (opt.resolution) opts.push('-s', opt.resolution)
-    else if (opt.scale) opts.push('-vf', `scale=${opt.scale}`)
+    else if (opt.scale) addToVf(`scale=${opt.scale}`)
+
+    const rotateMap = {
+        '90':  'transpose=1',
+        '180': 'transpose=2,transpose=2',
+        '270': 'transpose=2'
+    }
+    if (+opt.hardRotate > 0 && rotateMap[opt.hardRotate]) addToVf(rotateMap[opt.hardRotate])
+
     if (typeof opt.mute === 'boolean') {
         if (opt.mute) opts.push('-an')
         else opts.push('-acodec', 'copy')
@@ -304,8 +318,8 @@ function copy(s, t, opt, progress) {
 
 function compress(s, t, opt, progress) {
     const accepts = [
-        'mute', 'resolution', 'scale', 'fps', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf',
-        'vbv', 'keepMetadata', 'createTime'
+        'mute', 'resolution', 'scale', 'fps', 'rotate', 'hardRotate', 'resetRotate', 'fastStart',
+        'trims', 'crf', 'vbv', 'keepMetadata', 'createTime'
     ]
 
     if (Array.isArray(s)) s = s[0]
@@ -400,8 +414,8 @@ function merge(ss, t, opt, progress) {
 
 function playrate(s, t, opt, progress) {
     const accepts = [
-        'resolution', 'scale', 'fps', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
-        'playrate', 'keepMetadata', 'createTime'
+        'resolution', 'scale', 'fps', 'rotate', 'hardRotate', 'resetRotate', 'fastStart', 'trims',
+        'crf', 'vbv', 'playrate', 'keepMetadata', 'createTime'
     ]
 
     if (Array.isArray(s)) s = s[0]
