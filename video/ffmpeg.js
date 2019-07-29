@@ -909,13 +909,18 @@ module.exports = {
     ffmpeg.copy(test, 'sample-copy.mp4', { rotate: 90 }, p => console.log(`copy: ${p}`))
         .then(t => {
             console.log(t)
-            return ffmpeg.compress(test, 'sample-comp.mp4', { crf: 35 },
-                                   p => console.log(`compress: ${p}`))
+            return ffmpeg.compress(test, 'sample-comp.mp4', {
+                crf:        35,
+                hardRotate: 270
+            }, p => console.log(`compress: ${p}`))
         })
         .then(t => {
             console.log(t)
-            return ffmpeg.playrate(test, 'sample-rate.mp4', { playrate: 0.5 },
-                                   p => console.log(`playrate: ${p}`))
+            return ffmpeg.playrate(test, 'sample-rate.mp4', {
+                playrate:   0.5,
+                hardRotate: 180,
+                scale:      '640:-2'
+            }, p => console.log(`playrate: ${p}`))
         })
         .then(t => {
             console.log(t)
