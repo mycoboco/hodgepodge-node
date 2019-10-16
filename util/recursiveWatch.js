@@ -98,4 +98,11 @@ function watch(dirs, opts = {}, _emitter = new Emitter()) {
 
 module.exports = watch
 
+
+!true && !function () {
+    watch('test', { ignoreHiddenDirs: true })
+        .on('change', () => console.log('changed'))
+        .on('error', err => console.log(err || 'error'))
+}()
+
 // end of recursiveWatch.js
