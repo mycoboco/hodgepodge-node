@@ -25,7 +25,7 @@ function watch(dirs, opts = {}, _emitter = new Emitter()) {
     let watchers = []
     let synced
 
-    function filter(dirs, cb) {
+    function filter(dirs, opts, cb) {
         const filtereds = [], errors = []
 
         async.parallelLimit(
@@ -59,7 +59,7 @@ function watch(dirs, opts = {}, _emitter = new Emitter()) {
                 return scan(dirs, cb)
             }
 
-            filter(files.map(f => path.join(d, f)), filtereds => {
+            filter(files.map(f => path.join(d, f)), opts, filtereds => {
                 Array.prototype.push.apply(dirs, filtereds)
                 scan(dirs, cb)
             })
@@ -74,7 +74,7 @@ function watch(dirs, opts = {}, _emitter = new Emitter()) {
         watch(dirs, opts, _emitter)
     }
 
-    filter(ds, filtereds => {
+    filter(ds, { ...opts, ignoreHiddenDirs: false }, filtereds => {
         scan(filtereds, () => {
             if (!watchers) return
 
