@@ -17,7 +17,7 @@ function Emitter() {
 inherits(Emitter, EventEmitter)
 
 
-function watch(dirs, _emitter = new Emitter()) {
+function watch(dirs, opts = {}, _emitter = new Emitter()) {
     if (typeof dirs === 'string') dirs = [ dirs ]
 
     const ds = [ ...dirs ]
@@ -36,7 +36,9 @@ function watch(dirs, _emitter = new Emitter()) {
                         return callback()
                     }
 
-                    if (stats.isDirectory() && !stats.isSymbolicLink()) filtereds.push(d)
+                    const n = path.basename(d)
+                    if (stats.isDirectory() && !stats.isSymbolicLink() &&
+                        (!opts.ignoreHiddenDirs || n[0] !== '.')) filtereds.push(d)
                     callback()
                 })
             })),
@@ -69,7 +71,7 @@ function watch(dirs, _emitter = new Emitter()) {
 
         watchers.forEach(w => w.close())
         watchers = null
-        watch(dirs, _emitter)
+        watch(dirs, opts, _emitter)
     }
 
     filter(ds, filtereds => {
