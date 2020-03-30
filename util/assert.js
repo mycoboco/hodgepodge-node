@@ -5,18 +5,24 @@
 
 function Type(name, xtra) {
     this.name = name
-    if (xtra && xtra.optional) this.OPTIONAL = new Type(`${name}.OPTIONAL`)
-    if (xtra && xtra.nonempty) this.NONEMPTY = new Type(`${name}.NONEMPTY`)
+    if (xtra) {
+        if (xtra.optional) this.OPTIONAL = new Type(`${name}.OPTIONAL`)
+        if (xtra.nullable) this.NULLABLE = new Type(`${name}.NULLABLE`)
+        if (xtra.optional && xtra.nullable) {
+            this.NULLABLE.OPTIONAL = this.OPTIONAL.NULLABLE = new Type(`${name}.OPTIONAL.NULLABLE`)
+        }
+        if (xtra.nonempty) this.NONEMPTY = new Type(`${name}.NONEMPTY`)
+    }
 }
 
 
 const TYPES = {
-    STRING:    new Type('STRING',    { optional: true, nonempty: true }),
-    NUMBER:    new Type('NUMBER',    { optional: true }),
-    INTEGER:   new Type('INTEGER',   { optional: true }),
-    BOOLEAN:   new Type('BOOLEAN',   { optional: true }),
-    ARRAY:     new Type('ARRAY',     { optional: true, nonempty: true }),
-    OBJECT:    new Type('OBJECT',    { optional: true, nonempty: true }),
+    STRING:    new Type('STRING',    { optional: true, nonempty: true, nullable: true }),
+    NUMBER:    new Type('NUMBER',    { optional: true, nullable: true }),
+    INTEGER:   new Type('INTEGER',   { optional: true, nullable: true }),
+    BOOLEAN:   new Type('BOOLEAN',   { optional: true, nullable: true }),
+    ARRAY:     new Type('ARRAY',     { optional: true, nonempty: true, nullable: true }),
+    OBJECT:    new Type('OBJECT',    { optional: true, nonempty: true, nullable: true }),
     NOTEXISTS: new Type('NOTEXISTS')
 }
 
@@ -87,13 +93,25 @@ function like(target, ...specs) {
             case STRING.OPTIONAL:
                 if (target === undefined) return true
                 return isString(target)
+            case STRING.OPTIONAL.NULLABLE:
+                if (target === undefined || target === null) return true
+                return isString(target)
             case STRING.NONEMPTY:
                 return isNonEmptyString(target)
+            case STRING.NULLABLE:
+                if (target === null) return true
+                return isString(target)
 
             case NUMBER:
                 return isNumber(target)
             case NUMBER.OPTIONAL:
                 if (target === undefined) return true
+                return isNumber(target)
+            case NUMBER.OPTIONAL.NULLABLE:
+                if (target === undefined || target === null) return true
+                return isNumber(target)
+            case NUMBER.NULLABLE:
+                if (target === null) return true
                 return isNumber(target)
 
             case INTEGER:
@@ -101,11 +119,23 @@ function like(target, ...specs) {
             case INTEGER.OPTIONAL:
                 if (target === undefined) return true
                 return isInteger(target)
+            case INTEGER.OPTIONAL.NULLABLE:
+                if (target === undefined || target === null) return true
+                return isInteger(target)
+            case INTEGER.NULLABLE:
+                if (target === null) return true
+                return isInteger(target)
 
             case BOOLEAN:
                 return isBoolean(target)
             case BOOLEAN.OPTIONAL:
                 if (target === undefined) return true
+                return isBoolean(target)
+            case BOOLEAN.OPTIONAL.NULLABLE:
+                if (target === undefined || target === null) return true
+                return isBoolean(target)
+            case BOOLEAN.NULLABLE:
+                if (target === null) return true
                 return isBoolean(target)
 
             case ARRAY:
@@ -113,16 +143,28 @@ function like(target, ...specs) {
             case ARRAY.OPTIONAL:
                 if (target === undefined) return true
                 return isArray(target)
+            case ARRAY.OPTIONAL.NULLABLE:
+                if (target === undefined || target === null) return true
+                return isArray(target)
             case ARRAY.NONEMPTY:
                 return isNonEmptyArray(target)
+            case ARRAY.NULLABLE:
+                if (target === null) return true
+                return isArray(target)
 
             case OBJECT:
                 return isObject(target)
             case OBJECT.OPTIONAL:
                 if (target === undefined) return true
                 return isObject(target)
+            case OBJECT.OPTIONAL.NULLABLE:
+                if (target === undefined || target === null) return true
+                return isObject(target)
             case OBJECT.NONEMPTY:
                 return isNonEmptyObject(target)
+            case OBJECT.NULLABLE:
+                if (target === null) return true
+                return isObject(target)
 
             case NOTEXISTS:
                 return (target === undefined)
