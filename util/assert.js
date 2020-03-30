@@ -609,6 +609,11 @@ module.exports = {
         { foo: TYPES.STRING.NONEMPTY, bar: TYPES.ARRAY.OPTIONAL },
         { foo: TYPES.STRING.OPTIONAL, bar: [ TYPES.NUMBER ] },
     ))
+
+    console.log('--- for custom ---')
+    console.log(like(t => false, t => true))           // true
+    console.log(like({ foo: 1 }, t => t.foo === 1))
+    console.log(like(false, t => t))                   // false
 }()
 
 // end of assert.js
