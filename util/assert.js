@@ -273,12 +273,17 @@ module.exports = {
 
     console.log('--- TYPES.STRING ---')
     type = assert.TYPES.STRING
-    console.log(assert.like('',            type))             // true
+    console.log(assert.like('',            type))                      // true
     console.log(assert.like('foo',         type))
     console.log(assert.like('foo',         type.NONEMPTY))
     console.log(assert.like(undefined,     type.OPTIONAL))
     console.log(assert.like('',            type.OPTIONAL))
-    console.log(assert.like(null,          type.OPTIONAL))    // false
+    console.log(assert.like('foo',         type.OPTIONAL.NULLABLE))
+    console.log(assert.like(null,          type.OPTIONAL.NULLABLE))
+    console.log(assert.like(undefined,     type.OPTIONAL.NULLABLE))
+    console.log(assert.like('foo',         type.NULLABLE))
+    console.log(assert.like(null,          type.NULLABLE))
+    console.log(assert.like(null,          type.OPTIONAL))             // false
     console.log(assert.like('',            type.NONEMPTY))
     console.log(assert.like({},            type))
     console.log(assert.like(null,          type))
@@ -286,28 +291,46 @@ module.exports = {
     console.log(assert.like(1,             type))
     console.log(assert.like(Math.sqrt(-1), type))
     console.log(assert.like(true,          type))
+    console.log(assert.like(undefined,     type.NULLABLE))
+    console.log(assert.like(1,             type.OPTIONAL.NULLABLE))
+    console.log(assert.like(1,             type.NULLABLE))
+    console.log(assert.like(undefined,     type.NULLABLE))
 
     console.log('--- TYPES.NUMBER ---')
     type = assert.TYPES.NUMBER
-    console.log(assert.like(0,                       type))             // true
+    console.log(assert.like(0,                       type))                      // true
     console.log(assert.like(0.1,                     type))
     console.log(assert.like(Number.MAX_SAFE_INTEGER, type))
     console.log(assert.like(undefined,               type.OPTIONAL))
-    console.log(assert.like(null,                    type.OPTIONAL))    // false
+    console.log(assert.like(0.1,                     type.OPTIONAL.NULLABLE))
+    console.log(assert.like(null,                    type.OPTIONAL.NULLABLE))
+    console.log(assert.like(undefined,               type.OPTIONAL.NULLABLE))
+    console.log(assert.like(0.1,                     type.NULLABLE))
+    console.log(assert.like(null,                    type.NULLABLE))
+    console.log(assert.like(null,                    type.OPTIONAL))             // false
     console.log(assert.like(Math.sqrt(-1),           type))
     console.log(assert.like(false,                   type))
     console.log(assert.like('0',                     type))
     console.log(assert.like(null,                    type))
     console.log(assert.like(undefined,               type))
+    console.log(assert.like(undefined,               type.NULLABLE))
+    console.log(assert.like('foo',                   type.OPTIONAL.NULLABLE))
+    console.log(assert.like('foo',                   type.NULLABLE))
+    console.log(assert.like(undefined,               type.NULLABLE))
 
     console.log('--- TYPES.INTEGER ---')
     type = assert.TYPES.INTEGER
-    console.log(assert.like(0,                          type))             // true
+    console.log(assert.like(0,                          type))                      // true
     console.log(assert.like(0.0,                        type))
     console.log(assert.like(Number.MAX_SAFE_INTEGER,    type))
     console.log(assert.like(-Number.MAX_SAFE_INTEGER,   type))
     console.log(assert.like(undefined,                  type.OPTIONAL))
-    console.log(assert.like(null,                       type.OPTIONAL))    // false
+    console.log(assert.like(0,                          type.OPTIONAL.NULLABLE))
+    console.log(assert.like(null,                       type.OPTIONAL.NULLABLE))
+    console.log(assert.like(undefined,                  type.OPTIONAL.NULLABLE))
+    console.log(assert.like(0,                          type.NULLABLE))
+    console.log(assert.like(null,                       type.NULLABLE))
+    console.log(assert.like(null,                       type.OPTIONAL))             // false
     console.log(assert.like(Number.MAX_SAFE_INTEGER+1,  type))
     console.log(assert.like(-Number.MAX_SAFE_INTEGER-1, type))
     console.log(assert.like(0.000001,                   type))
@@ -315,13 +338,22 @@ module.exports = {
     console.log(assert.like('0',                        type))
     console.log(assert.like(null,                       type))
     console.log(assert.like(undefined,                  type))
+    console.log(assert.like(undefined,                  type.NULLABLE))
+    console.log(assert.like('foo',                      type.OPTIONAL.NULLABLE))
+    console.log(assert.like('foo',                      type.NULLABLE))
+    console.log(assert.like(undefined,                  type.NULLABLE))
 
     console.log('--- TYPES.BOOLEAN ---')
     type = assert.TYPES.BOOLEAN
-    console.log(assert.like(false,     type))             // true
+    console.log(assert.like(false,     type))                      // true
     console.log(assert.like(true,      type))
     console.log(assert.like(undefined, type.OPTIONAL))
-    console.log(assert.like(null,      type.OPTIONAL))    // false
+    console.log(assert.like(false,     type.OPTIONAL.NULLABLE))
+    console.log(assert.like(null,      type.OPTIONAL.NULLABLE))
+    console.log(assert.like(undefined, type.OPTIONAL.NULLABLE))
+    console.log(assert.like(true,      type.NULLABLE))
+    console.log(assert.like(null,      type.NULLABLE))
+    console.log(assert.like(null,      type.OPTIONAL))             // false
     console.log(assert.like('',        type))
     console.log(assert.like('false',   type))
     console.log(assert.like('true',    type))
@@ -329,13 +361,22 @@ module.exports = {
     console.log(assert.like(1,         type))
     console.log(assert.like(null,      type))
     console.log(assert.like(undefined, type))
+    console.log(assert.like(undefined, type.NULLABLE))
+    console.log(assert.like('foo',     type.OPTIONAL.NULLABLE))
+    console.log(assert.like('foo',     type.NULLABLE))
+    console.log(assert.like(undefined, type.NULLABLE))
 
     console.log('--- TYPES.ARRAY ---')
     type = assert.TYPES.ARRAY
-    console.log(assert.like([],        type))             // true
+    console.log(assert.like([],        type))                      // true
     console.log(assert.like(['foo'],   type.NONEMPTY))
     console.log(assert.like(undefined, type.OPTIONAL))
-    console.log(assert.like(null,      type.OPTIONAL))    // false
+    console.log(assert.like([],        type.OPTIONAL.NULLABLE))
+    console.log(assert.like(null,      type.OPTIONAL.NULLABLE))
+    console.log(assert.like(undefined, type.OPTIONAL.NULLABLE))
+    console.log(assert.like([],        type.NULLABLE))
+    console.log(assert.like(null,      type.NULLABLE))
+    console.log(assert.like(null,      type.OPTIONAL))             // false
     console.log(assert.like([],        type.NONEMPTY))
     console.log(assert.like({},        type))
     console.log(assert.like({},        type.OPTIONAL))
@@ -345,14 +386,23 @@ module.exports = {
     console.log(assert.like(0,         type))
     console.log(assert.like(null,      type))
     console.log(assert.like(undefined, type))
+    console.log(assert.like(undefined, type.NULLABLE))
+    console.log(assert.like('foo',     type.OPTIONAL.NULLABLE))
+    console.log(assert.like('foo',     type.NULLABLE))
+    console.log(assert.like(undefined, type.NULLABLE))
 
     console.log('--- TYPES.OBJECT ---')
     type = assert.TYPES.OBJECT
-    console.log(assert.like({},         type))             // true
+    console.log(assert.like({},         type))                      // true
     console.log(assert.like({ foo: 1 }, type))
     console.log(assert.like({ foo: 1 }, type.NONEMPTY))
     console.log(assert.like(undefined,  type.OPTIONAL))
-    console.log(assert.like({},         type.NONEMPTY))    // false
+    console.log(assert.like({},         type.OPTIONAL.NULLABLE))
+    console.log(assert.like(null,       type.OPTIONAL.NULLABLE))
+    console.log(assert.like(undefined,  type.OPTIONAL.NULLABLE))
+    console.log(assert.like({},         type.NULLABLE))
+    console.log(assert.like(null,       type.NULLABLE))
+    console.log(assert.like({},         type.NONEMPTY))             // false
     console.log(assert.like([],         type))
     console.log(assert.like([],         type.OPTIONAL))
     console.log(assert.like(null,       type.OPTIONAL))
@@ -362,6 +412,10 @@ module.exports = {
     console.log(assert.like(0,          type))
     console.log(assert.like(null,       type))
     console.log(assert.like(undefined,  type))
+    console.log(assert.like(undefined,  type.NULLABLE))
+    console.log(assert.like('foo',      type.OPTIONAL.NULLABLE))
+    console.log(assert.like('foo',      type.NULLABLE))
+    console.log(assert.like(undefined,  type.NULLABLE))
 
     console.log('--- complex OBJECT ---')
     console.log(assert.like(    // true
