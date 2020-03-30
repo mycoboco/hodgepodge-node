@@ -170,6 +170,7 @@ function like(target, ...specs) {
                 return (target === undefined)
 
             default:
+                if (typeof spec === 'function') return spec(target)
                 if (isObject(spec) && isObject(target)) {
                     return Object.keys(spec).every(k => like(target[k], spec[k]))
                 }
