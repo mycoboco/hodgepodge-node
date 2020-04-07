@@ -20,14 +20,16 @@
   "license": "MIT",
   "dependencies": {
     "minify": "^4.1.1",
-    "node-sass": "^4.12.0"
+    "node-sass": "^4.13.1"
   },
   "devDependencies": {},
   "engines": {
     "node": ">=6.4.0"
   },
   "keywords": [
-    "node.js server", "helper", "library",
+    "node.js server",
+    "helper",
+    "library",
     "web"
   ]
 }
