@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/video",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "a hodgepodge of video modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
@@ -23,9 +23,13 @@
     "mime": "^2.2.0"
   },
   "devDependencies": {},
-  "engines": { "node": ">=6.4.0" },
+  "engines": {
+    "node": ">=6.4.0"
+  },
   "keywords": [
-    "node.js server", "helper", "library",
+    "node.js server",
+    "helper",
+    "library",
     "video processing"
   ]
 }
