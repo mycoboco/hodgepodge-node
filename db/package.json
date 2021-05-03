@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/db",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "a hodgepodge of db modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
@@ -24,9 +24,13 @@
     "sequelize": "^5.8.7"
   },
   "devDependencies": {},
-  "engines": { "node": ">=6.4.0" },
+  "engines": {
+    "node": ">=6.4.0"
+  },
   "keywords": [
-    "node.js server", "helper", "library",
+    "node.js server",
+    "helper",
+    "library",
     "db"
   ]
 }
