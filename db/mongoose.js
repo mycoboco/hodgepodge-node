@@ -35,7 +35,6 @@ module.exports = mongoose => {
         log.info(`connecting to ${hide(url)}`)
 
         mongoose.createConnection(url, {
-            useMongoClient:    true,
             autoReconnect:     true,
             reconnectInterval: conf.reconnectTime*1000,
             keepAlive:         1,
