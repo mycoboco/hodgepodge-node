@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/db",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "a hodgepodge of db modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
