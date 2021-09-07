@@ -34,6 +34,7 @@ module.exports = mongoose => {
 
         log.info(`connecting to ${hide(url)}`)
 
+        // mongoose 6.x does not accept these defaults
         mongoose.createConnection(url, {
             useMongoClient:    true,
             autoReconnect:     true,
