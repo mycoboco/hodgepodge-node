@@ -2,75 +2,98 @@
  *  connects to or disconnects from MongoDB
  */
 
-const hide = require('./hide')
+const hide = require('./hide');
 
+module.exports = (mongoose) => {
+  let db;
+  let log;
 
-module.exports = mongoose => {
-    let db, log
+  const init = (
+    _log = {
+      info: () => {},
+      warning: () => {},
+      error: () => {},
+    },
+  ) => log = _log;
 
-    function init(
-        _log = {
-            info:    () => {},
-            warning: () => {},
-            error:   () => {}
-        }
-    ) {
-        log = _log
+  const connect = (conf, cb) => {
+    let url = 'mongodb://';
+
+    if (conf.user && conf.password) url += `${conf.user}:${conf.password}@`;
+    if (Array.isArray(conf.replSet)) {
+      url += conf.replSet.map((replSet) => `${replSet.host}:${replSet.port}`).join(',');
+    } else {
+      url += `${conf.host}:${conf.port}`;
     }
+    url += `/${conf.db}`;
+    if (conf.replicaSet) url += `?replicaSet=${conf.replicaSet}`;
 
-    function connect(conf, cb) {
-        let url = 'mongodb://'
+    log.info(`connecting to ${hide(url)}`);
 
-        if (conf.user && conf.password) url += `${conf.user}:${conf.password}@`
-        if (Array.isArray(conf.replSet)) {
-            for (let i = 0; i < conf.replSet.length; i++) {
-                url += `${(i > 0)? ',': ''}${conf.replSet[i].host}:${conf.replSet[i].port}`
-            }
-        } else {
-            url += `${conf.host}:${conf.port}`
-        }
-        url += `/${conf.db}`
-        if (conf.replicaSet) url += `?replicaSet=${conf.replicaSet}`
+    // mongoose 6.x does not accept these defaults
+    const promise = mongoose.createConnection(url, {
+      keepAlive: true,
+      socketTimeoutMS: 0,
+      ...conf.option,
+    })
+      .asPromise()
+      .then((conn) => {
+        log.info(`connected to ${hide(url)}`);
+        db = conn;
+        if (cb) return cb(null, conn);
+        return conn;
+      })
+      .catch((err) => {
+        log.error(err);
+        db && db.close();
+        if (cb) return cb(err);
+        throw err;
+      });
 
-        log.info(`connecting to ${hide(url)}`)
+    if (!cb) return promise;
+  };
 
-        // mongoose 6.x does not accept these defaults
-        mongoose.createConnection(url, {
-            useMongoClient:    true,
-            autoReconnect:     true,
-            reconnectInterval: conf.reconnectTime*1000,
-            keepAlive:         1,
-            socketTimeoutMS:   0,
-            ...conf.option
-        })
-            .on('connected', () => log.info(`connected to ${hide(url)}`))
-            .on('error', err => {
-                log.error(err)
-                db && db.close()
-            })
-            .on('reconnected', () => log.warning(`reconnected to ${hide(url)}`))
-            .then(_db => {
-                db = _db
-                cb(null, _db)
-            })
-            .catch(cb)
-    }
+  const close = () => {
+    if (!db) return;
 
-    function close() {
-        if (!db) return
+    log && log.info('closing db connection');
+    db.close();
+  };
 
-        log && log.info('closing db connection')
-        db.removeAllListeners('connected')
-          .removeAllListeners('error')
-          .removeAllListeners('reconnected')
-          .close()
-    }
+  return {
+    init,
+    connect,
+    close,
+  };
+};
 
-    return {
-        init,
-        connect,
-        close
-    }
+// eslint-disable-next-line no-constant-condition
+if (false) {
+  const option = {
+    host: 'localhost',
+    port: 27017,
+    db: 'test',
+  };
+  const mongoose = require('mongoose');
+  const m = module.exports(mongoose);
+  m.init(console);
+  // eslint-disable-next-line no-constant-condition
+  if ('promise') {
+    m.connect(option)
+      .then((conn) => {
+        console.log(conn);
+        m.close();
+      })
+      .catch((err) => {
+        console.log(err);
+        m.close();
+      });
+  } else {
+    m.connect(option, (err, conn) => {
+      console.log(err, conn);
+      m.close();
+    });
+  }
 }
 
 // mongoose.js

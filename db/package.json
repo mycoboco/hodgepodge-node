@@ -19,9 +19,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "mysql2": "^1.6.5",
-    "redis": "^1.0.0",
-    "sequelize": "^5.8.7"
+    "mongoose": "^6.7.0",
+    "mysql2": "^2.3.3",
+    "redis": "^4.3.1",
+    "sequelize": "^6.25.3"
   },
   "devDependencies": {
     "eslint": "^8.18.0",
