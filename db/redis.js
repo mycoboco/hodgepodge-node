@@ -16,7 +16,7 @@ module.exports = () => {
     },
   ) => log = _log;
 
-  const connect = (conf) => {
+  const connect = (conf, cb) => {
     // for backward compatibility
     if (conf.db) {
       conf.database = conf.db;
@@ -30,8 +30,20 @@ module.exports = () => {
     log.info(`connecting to redis(${conf.host}:${conf.port})`);
     client = redis.createClient(conf.port, conf.host, conf.option);
     client.on('error', (err) => log.error(err));
+    const promise = client.connect()
+      .then(() => {
+        log.info(`connected to redis(${conf.host}:${conf.port})`);
+        if (cb) return cb(null, client);
+        return client;
+      })
+      .catch((err) => {
+        log.error(err);
+        db && db.close();
+        if (cb) return cb(err);
+        throw err;
+      });
 
-    return client;
+    if (!cb) return promise;
   };
 
   const close = async (cb) => {
@@ -55,20 +67,29 @@ module.exports = () => {
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
+  const option = {
+    host: 'localhost',
+    port: 27017,
+    db: 0,
+  };
   const r = module.exports();
   r.init(console);
-  const client = r.connect({
-    host: 'localhost',
-    port: 6379,
-    db: 0,
-  });
-  console.log(client);
   // eslint-disable-next-line no-constant-condition
   if ('promise') {
-    r.close()
-      .then(() => console.log('closed'));
+    r.connect(option)
+      .then((client) => {
+        console.log(client);
+        r.close();
+      })
+      .catch((err) => {
+        console.log(err);
+        r.close();
+      });
   } else {
-    r.close(() => console.log('closed'));
+    r.connect(option, (err, client) => {
+      console.log(err, client);
+      r.close();
+    });
   }
 }
 
