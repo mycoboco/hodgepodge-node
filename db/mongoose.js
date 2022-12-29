@@ -70,7 +70,7 @@ module.exports = (mongoose) => {
 // eslint-disable-next-line no-constant-condition
 if (false) {
   const option = {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 27017,
     db: 'test',
   };

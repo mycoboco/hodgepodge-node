@@ -66,10 +66,10 @@ module.exports = () => {
 };
 
 // eslint-disable-next-line no-constant-condition
-if (false) {
+if (true) {
   const option = {
-    host: 'localhost',
-    port: 27017,
+    host: '127.0.0.1',
+    port: 6379,
     db: 0,
   };
   const r = module.exports();

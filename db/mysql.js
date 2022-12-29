@@ -75,7 +75,7 @@ module.exports = () => {
 // eslint-disable-next-line no-constant-condition
 if (true) {
   const option = {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 3306,
     db: 'test',
     user: 'user',
