@@ -19,13 +19,17 @@
   },
   "license": "MIT",
   "dependencies": {
-    "colors": "^1.1.2",
+    "colors": "^1.4.0",
+    "logform": "^2.4.2",
     "serve-static-restify": "^3.0.0",
-    "winston": "^2.2.0"
+    "winston": "^3.8.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^8.18.0",
+    "eslint-config-google": "^0.14.0"
+  },
   "engines": {
-    "node": ">=6.4.0"
+    "node": ">=14.0.0"
   },
   "keywords": [
     "node.js server",
