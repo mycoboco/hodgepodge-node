@@ -179,7 +179,7 @@ module.exports = {
 };
 
 // eslint-disable-next-line no-constant-condition
-if (true) {
+if (false) {
   !(function test() {
     const logger = module.exports;
     const log1 = logger.create({
