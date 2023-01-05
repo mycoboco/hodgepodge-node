@@ -155,8 +155,8 @@ function create(conf) {
                 label = label.blue;
                 locus = locus.cyan;
               }
-              return `${info.timestamp}${info.label ? label : ''} ${info.level}: ${info.message} ` +
-                `${locus}`;
+              return `${info.timestamp} - ${info.level}:${info.label ? label : ''} ` +
+                `${info.message} ${locus}`;
             }),
         ),
       }),
