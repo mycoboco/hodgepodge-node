@@ -2,107 +2,106 @@
  *  recursive fs.watch()
  */
 
-const fs = require('fs')
-const path = require('path')
-const { inherits } = require('util')
-const EventEmitter = require('events')
+const fs = require('fs/promises');
+const path = require('path');
+const EventEmitter = require('events');
 
-const async = require('async')
+const pLimit = require('p-limit');
 
+module.exports = function watch(dirs, opts = {}, _emitter = new EventEmitter()) {
+  if (typeof dirs === 'string') dirs = [dirs];
 
-function Emitter() {
-    EventEmitter.call(this)
-}
+  const ds = [...dirs];
+  const collecteds = [];
+  let watchers = [];
+  let synced;
 
-inherits(Emitter, EventEmitter)
+  const filter = async (dirs, opts) => {
+    const filtereds = [];
 
+    const limit = pLimit(10);
 
-function watch(dirs, opts = {}, _emitter = new Emitter()) {
-    if (typeof dirs === 'string') dirs = [ dirs ]
+    await Promise.all(
+      dirs.map((d) =>
+        limit(async () => {
+          const stats = await fs.stat(d);
+          const n = path.basename(d);
+          if (stats.isDirectory() && !stats.isSymbolicLink() &&
+            (!opts.ignoreHiddenDirs || n[0] !== '.')) {
+            filtereds.push(d);
+          }
+        }),
+      ),
+    );
 
-    const ds = [ ...dirs ]
-    const collecteds = []
-    let watchers = []
-    let synced
+    return filtereds;
+  };
 
-    function filter(dirs, opts, cb) {
-        const filtereds = [], errors = []
+  const scan = async (dirs) => {
+    if (dirs.length === 0) return;
 
-        async.parallelLimit(
-            dirs.map(d => (callback => {
-                fs.stat(d, (err, stats) => {
-                    if (err) {
-                        _emitter.emit('error', err)
-                        return callback()
-                    }
+    const d = dirs.pop();
+    collecteds.push(d);
 
-                    const n = path.basename(d)
-                    if (stats.isDirectory() && !stats.isSymbolicLink() &&
-                        (!opts.ignoreHiddenDirs || n[0] !== '.')) filtereds.push(d)
-                    callback()
-                })
-            })),
-            10,
-            () => cb(filtereds)
-        )
+    let files;
+    try {
+      files = await fs.readdir(d);
+    } catch (err) {
+      _emitter.emit('error', err);
+      scan(dirs);
     }
 
-    function scan(dirs, cb) {
-        if (dirs.length === 0) return cb()
+    const filtereds = await filter(files.map((f) => path.join(d, f)), opts);
+    await scan([...dirs, ...filtereds]);
+  };
 
-        const d = dirs.pop()
-        collecteds.push(d)
+  _emitter.sync = async () => {
+    if (synced || !watchers) return;
 
-        fs.readdir(d, (err, files) => {
-            if (err) {
-                _emitter.emit('error', err)
-                return scan(dirs, cb)
+    watchers.forEach((abort) => abort());
+    watchers = null;
+    watch(dirs, opts, _emitter);
+  };
+
+  filter(ds, {...opts, ignoreHiddenDirs: false})
+    .then(scan)
+    .then(() => {
+      if (!watchers) return;
+
+      collecteds.forEach((d) => {
+        const ac = new AbortController();
+        const {signal} = ac;
+        (async () => {
+          try {
+            const watcher = fs.watch(d, {signal});
+            // eslint-disable-next-line no-empty-pattern
+            for await (const {} of watcher) {
+              synced = false;
+              _emitter.emit('change');
             }
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+            _emitter.emit('error', err);
+          }
+        })();
+        watchers.push(() => ac.abort());
+      });
+      synced = true;
+    });
 
-            filter(files.map(f => path.join(d, f)), opts, filtereds => {
-                Array.prototype.push.apply(dirs, filtereds)
-                scan(dirs, cb)
-            })
-        })
-    }
+  return _emitter;
+};
 
-    _emitter.sync = () => {
-        if (synced || !watchers) return
-
-        watchers.forEach(w => w.close())
-        watchers = null
-        watch(dirs, opts, _emitter)
-    }
-
-    filter(ds, { ...opts, ignoreHiddenDirs: false }, filtereds => {
-        scan(filtereds, () => {
-            if (!watchers) return
-
-            collecteds.forEach(d => {
-                watchers.push(
-                    fs.watch(d)
-                        .on('error', () => _emitter.emit('error'))
-                        .on('change', () => {
-                            synced = false
-                            _emitter.emit('change')
-                        })
-                )
-            })
-            synced = true
-        })
-    })
-
-    return _emitter
+// eslint-disable-next-line no-constant-condition
+if (true) {
+  const w = module.exports;
+  const emitter = w('test', {ignoreHiddenDirs: true})
+    .on('change', () => console.log('changed'))
+    .on('error', (err) => console.log(err || 'error'));
+  setInterval(() => {
+    console.log('synced');
+    emitter.sync();
+  }, 15 * 1000);
 }
-
-
-module.exports = watch
-
-
-!true && !function () {
-    watch('test', { ignoreHiddenDirs: true })
-        .on('change', () => console.log('changed'))
-        .on('error', err => console.log(err || 'error'))
-}()
 
 // end of recursiveWatch.js
