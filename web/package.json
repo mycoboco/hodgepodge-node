@@ -19,12 +19,15 @@
   },
   "license": "MIT",
   "dependencies": {
-    "minify": "^4.1.1",
+    "minify": "^7.2.2",
     "node-sass": "^8.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^8.18.0",
+    "eslint-config-google": "^0.14.0"
+  },
   "engines": {
-    "node": ">=6.4.0"
+    "node": ">=14.0.0"
   },
   "keywords": [
     "node.js server",
