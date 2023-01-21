@@ -4,6 +4,8 @@
 
 const redis = require('redis');
 
+const hide = require('./hide');
+
 module.exports = () => {
   let client;
   let log;
@@ -17,18 +19,18 @@ module.exports = () => {
   ) => log = _log;
 
   const connect = (conf, cb) => {
-    // for backward compatibility
-    if (conf.db) {
-      conf.database = conf.db;
-      delete conf.db;
-    }
-    if (conf.auth) {
-      conf.password = conf.auth;
-      delete conf.auth;
-    }
+    let url = 'redis://';
 
-    log.info(`connecting to redis(${conf.host}:${conf.port})`);
-    client = redis.createClient(conf.port, conf.host, conf.option);
+    if (conf.user) url += conf.user;
+    if (conf.auth || conf.password) url += `:${conf.auth || conf.password}`;
+    if (conf.user || conf.auth || conf.password) url += '@';
+    url += `${conf.host}:${conf.port}/${conf.db}`;
+
+    log.info(`connecting to ${hide(url)}`);
+    client = redis.createClient({
+      url,
+      ...conf.option
+    });
     client.on('error', (err) => log.error(err));
     const promise = client.connect()
       .then(() => {
@@ -66,7 +68,7 @@ module.exports = () => {
 };
 
 // eslint-disable-next-line no-constant-condition
-if (true) {
+if (false) {
   const option = {
     host: '127.0.0.1',
     port: 6379,
