@@ -8,6 +8,7 @@ module.exports = {
   logger: require('./logger'),
   range: require('./range'),
   fallback: require('./fallback'),
+  allowLocalOnly: require('./allowLocalOnly'),
 };
 
 // end of index.js
