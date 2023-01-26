@@ -93,7 +93,7 @@ module.exports = function watch(dirs, opts = {}, _emitter = new EventEmitter()) 
 };
 
 // eslint-disable-next-line no-constant-condition
-if (true) {
+if (false) {
   const w = module.exports;
   const emitter = w('test', {ignoreHiddenDirs: true})
     .on('change', () => console.log('changed'))

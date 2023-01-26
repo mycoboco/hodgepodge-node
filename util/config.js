@@ -43,7 +43,7 @@ module.exports = (p = 'config', _conf, opt) => {
 };
 
 // eslint-disable-next-line no-constant-condition
-if (true) {
+if (false) {
   const c = module.exports;
   console.log(c(path.join('.', 'test'), {
     'foo': {
