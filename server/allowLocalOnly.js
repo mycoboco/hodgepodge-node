@@ -3,7 +3,8 @@
  */
 
 const ipRangeCheck = require('ip-range-check');
-const {getReqIp, ServerError} = require('./');
+const getReqIp = require('./getReqIp');
+const ServerError = require('./ServerError');
 
 module.exports = (req, _res, next) => {
   const ip = getReqIp(req);
