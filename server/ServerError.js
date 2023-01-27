@@ -12,11 +12,11 @@ class ServerError extends Error {
       message.statusCode = code;
       return message;
     }
-    if (isFinite(message.statusCode) && message.request && message.request.host) {
-      // from request's response
+    if (isFinite(message.status) && message.url && message.statusText) {
+      // from fetch's response
       const {body} = message;
-      message = `${message.request.host} gave status: ${message.statusCode} ` +
-        `(${typeof body === 'string' && body ? body : message.statusMessage})`;
+      message = `${message.url} gave status: ${message.status} ` +
+        `(${typeof body === 'string' && body ? body : message.statusText})`;
     }
     super(message);
     Error.captureStackTrace(this, ServerError);
