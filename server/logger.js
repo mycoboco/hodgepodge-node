@@ -72,7 +72,7 @@ const root = (() => {
 
 // ?conf = {
 //     prefix: 'prefix',
-//     level:  'info' || 'warning' || 'error' || 'off',
+//     level:  'info' || 'warn' || 'error' || 'off',
 //     stack:  true || false
 // }
 function create(conf) {
@@ -125,6 +125,7 @@ function create(conf) {
   const logger = winston.createLogger({
     levels: {
       error: 0,
+      warn: 1,
       warning: 1,
       info: 2,
     },
@@ -142,6 +143,7 @@ function create(conf) {
           ...(colorize ? [format.colorize({
             colors: {
               error: 'red',
+              warn: 'yellow',
               warning: 'yellow',
               info: 'green',
             },
@@ -163,7 +165,7 @@ function create(conf) {
     ],
   });
 
-  ['error', 'warning', 'info', 'http', 'verbose', 'debug', 'silly'].forEach((level) => {
+  ['error', 'warn', 'warning', 'info', 'http', 'verbose', 'debug', 'silly'].forEach((level) => {
     const original = logger[level];
     logger[level] = (msg, ...rest) => {
       // eslint-disable-next-line no-undef
@@ -196,13 +198,13 @@ if (false) {
     });
     const log3 = logger.create({
       prefix: 'no-info',
-      level: 'warning',
+      level: 'warn',
       json: false,
       stack: false,
     });
 
     log1.info('information message', {foo: 'bar'}, 2);
-    log1.warning('warning message', ['foo', 'bar'], 'second', undefined);
+    log1.warn('warning message', ['foo', 'bar'], 'second', undefined);
     log1.error(new Error('error message'), {nested: {foo: 'bar'}}, null);
 
     log2.info('information message');
@@ -210,7 +212,7 @@ if (false) {
     log2.error(new Error('error message'));
 
     log3.info('information message', {foo: 'bar'}, 2);
-    log3.warning('warning message', ['foo', 'bar'], 'second', undefined);
+    log3.warn('warning message', ['foo', 'bar'], 'second', undefined);
     log3.error(new Error('error message'), {nested: {foo: 'bar'}}, null);
   })();
 }
