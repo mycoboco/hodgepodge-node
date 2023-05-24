@@ -29,7 +29,7 @@ module.exports = () => {
     log.info(`connecting to ${hide(url)}`);
     client = redis.createClient({
       url,
-      ...conf.option
+      ...conf.option,
     });
     client.on('error', (err) => log.error(err));
     const promise = client.connect()
