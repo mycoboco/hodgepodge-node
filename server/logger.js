@@ -29,14 +29,14 @@ const root = (() => {
 // adds global property to trace call stacks
 // eslint-disable-next-line no-prototype-builtins
 !global.hasOwnProperty('__stack') && Object.defineProperty(global, '__stack', {
-  get: function() {
+  get() {
     const orig = Error.prepareStackTrace;
     const err = new Error;
 
     Error.prepareStackTrace = (_, stack) => stack;
     // eslint-disable-next-line no-caller
     Error.captureStackTrace(err, arguments.callee);
-    const stack = err.stack;
+    const {stack} = err;
     Error.prepareStackTrace = orig;
 
     return stack;
@@ -46,7 +46,7 @@ const root = (() => {
 // adds global property to get line number
 // eslint-disable-next-line no-prototype-builtins
 !global.hasOwnProperty('__line') && Object.defineProperty(global, '__line', {
-  get: function() {
+  get() {
     // eslint-disable-next-line no-undef
     return __stack[2].getLineNumber();
   },
@@ -56,7 +56,7 @@ const root = (() => {
 // adds global property to get function name
 // eslint-disable-next-line no-prototype-builtins
 !global.hasOwnProperty('__function') && Object.defineProperty(global, '__function', {
-  get: function() {
+  get() {
     // eslint-disable-next-line no-undef
     return __stack[2].getFunctionName();
   },
@@ -64,7 +64,7 @@ const root = (() => {
 
 // adds global property to get file name
 !Object.prototype.hasOwnProperty.call(global, '__file') && Object.defineProperty(global, '__file', {
-  get: function() {
+  get() {
     // eslint-disable-next-line no-undef
     return __stack[2].getFileName().substring(root.length + 1);
   },
@@ -87,7 +87,7 @@ function create(conf) {
 
   const locus = winston.format((info) => {
     // additional field
-    info.locus = info[SPLAT][0];
+    [info.locus] = info[SPLAT];
     return info;
   });
 
