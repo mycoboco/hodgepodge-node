@@ -8,7 +8,7 @@ const debug = false;
 function add(child) {
   const handler = () => remove(child);
 
-  debug && console.log(`adding ${child.pid}`);
+  if (debug) console.log(`adding ${child.pid}`);
   childs.push({
     handle: child,
     handler,
@@ -21,7 +21,7 @@ function add(child) {
 function remove(child) {
   const i = childs.findIndex((c) => c.handle === child);
   if (i < 0) return;
-  debug && console.log(`removing ${child.pid}`);
+  if (debug) console.log(`removing ${child.pid}`);
   childs.splice(i, 1);
 
   return child;
@@ -30,7 +30,7 @@ function remove(child) {
 function clean() {
   childs.forEach((c) => {
     c.handle.removeListener('exit', c.handler);
-    debug && console.log(`killing ${c.handle.pid}`);
+    if (debug) console.log(`killing ${c.handle.pid}`);
     c.handle.kill(); // may be unsafe or not work
   });
 }

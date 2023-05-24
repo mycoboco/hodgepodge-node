@@ -7,7 +7,7 @@ module.exports = (rs, ws, _handler) => {
   const handler = (err) => {
     rs.unpipe(ws);
     ws.end();
-    _handler && _handler(err);
+    if (_handler) _handler(err);
   };
 
   ws.on('unpipe', () => rs.once('readable', () => rs.destroy()));

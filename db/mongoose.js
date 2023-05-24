@@ -45,7 +45,7 @@ module.exports = (mongoose) => {
       })
       .catch((err) => {
         log.error(err);
-        db && db.close();
+        if (db) db.close();
         if (cb) return cb(err);
         throw err;
       });
@@ -56,7 +56,7 @@ module.exports = (mongoose) => {
   const close = () => {
     if (!db) return;
 
-    log && log.info('closing db connection');
+    if (log) log.info('closing db connection');
     db.close();
   };
 

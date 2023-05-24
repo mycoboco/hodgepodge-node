@@ -31,7 +31,7 @@ function serve(
         .send(result);
       await fs.writeFile(path.join(pub, req.url), result);
     } catch (err) {
-      err && log.error(err);
+      log.error(err);
     }
   };
 }

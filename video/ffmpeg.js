@@ -192,14 +192,16 @@ function drive(t, opts, progress) {
       })
       .on('error', reject);
 
-    progress && ffmpeg.stderr
-      .on('data', (data) => {
-        const prog = /time=([0-9]+:[0-9]+:[0-9.]+)/.exec(data.toString());
-        prog && progress(secsFromString(prog[1]));
-      })
-      .on('error', () => {
-        // ignore errors expecting abnormal exit
-      });
+    if (progress) {
+      ffmpeg.stderr
+        .on('data', (data) => {
+          const prog = /time=([0-9]+:[0-9]+:[0-9.]+)/.exec(data.toString());
+          if (prog) progress(secsFromString(prog[1]));
+        })
+        .on('error', () => {
+          // ignore errors expecting abnormal exit
+        });
+    }
   });
 }
 

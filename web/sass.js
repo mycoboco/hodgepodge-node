@@ -35,7 +35,7 @@ function serve(
       }
       res.header('Content-type', 'text/css')
         .send(result.css);
-      fs.writeFile(path.join(pub, req.url), result.css, (err) => err && log.error(err));
+      fs.writeFile(path.join(pub, req.url), result.css, (err) => log.error(err));
     });
   };
 }
