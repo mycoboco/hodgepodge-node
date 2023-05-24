@@ -40,7 +40,6 @@ module.exports = () => {
       })
       .catch((err) => {
         log.error(err);
-        db && db.close();
         if (cb) return cb(err);
         throw err;
       });
