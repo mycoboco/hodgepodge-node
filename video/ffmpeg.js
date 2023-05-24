@@ -98,7 +98,7 @@ function probe(ps) {
             if (height) info.height = +height[1];
 
             const dar = /display_aspect_ratio=([0-9]+:[0-9]+)/.exec(stdout);
-            if (dar) info.dar = dar[1];
+            if (dar) [, info.dar] = dar;
 
             const fps = /,\s*([0-9.]+) fps/.exec(stderr);
             if (fps) info.fps = +fps[1];
@@ -270,7 +270,7 @@ async function copy(s, t, opt, progress) {
     'mute', 'rotate', 'resetRotate', 'fastStart', 'trims', 'keepMetadata', 'createTime',
   ];
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   opt = {
     mute: false,
@@ -300,7 +300,7 @@ async function compress(s, t, opt, progress) {
     'trims', 'crf', 'vbv', 'keepMetadata', 'createTime',
   ];
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   opt = {
     mute: false,
@@ -385,7 +385,7 @@ async function playrate(s, t, opt, progress) {
     'crf', 'vbv', 'playrate', 'keepMetadata', 'createTime',
   ];
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   opt = {
     resetRotate: true,
@@ -427,7 +427,7 @@ async function thumbnail(s, t, opt) {
     return path.join(dir, `${base}-${i}${ext}`);
   };
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   opt = {
     thumbnails: [0],
@@ -471,14 +471,14 @@ async function thumbnail(s, t, opt) {
 async function preview(s, t, opt) {
   const accepts = ['trims', 'number', 'fps', 'height', 'quality', 'blank'];
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   const tmp = path.join(os.tmpdir(), `${path.basename(t)}-tmp.mp4`);
   temps.push(tmp);
   const height = opt.height || 120;
   let number;
   let fps;
-  if (typeof opt.fps === 'number') fps = opt.fps;
+  if (typeof opt.fps === 'number') ({fps} = opt);
   else number = opt.number || 100;
 
   const info = await probe(s);
@@ -618,7 +618,7 @@ function vidstab(s, t, opt, progress) {
     return s;
   };
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   const trf = path.join(os.tmpdir(), `${path.basename(t)}.trf`);
   temps.push(trf);
@@ -702,7 +702,7 @@ async function blur(s, t, opt, progress) {
     return s.substring(0, s.length - 1);
   };
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   opt = {
     mute: false,
@@ -734,7 +734,7 @@ async function landscape(s, t, opt, progress) {
     'blurs', 'keepMetadata', 'createTime',
   ];
 
-  if (Array.isArray(s)) s = s[0];
+  if (Array.isArray(s)) [s] = s;
 
   opt = {
     mute: false,
