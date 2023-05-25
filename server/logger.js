@@ -178,8 +178,13 @@ function create(conf) {
   ['error', 'warn', 'warning', 'info', 'http', 'verbose', 'debug', 'silly'].forEach((level) => {
     const original = logger[level];
     logger[level] = (msg, ...rest) => {
-      // eslint-disable-next-line no-undef
-      original.call(logger, msg, `${__file}:${__line} (${__function})`, rest);
+      original.call(
+        logger,
+        msg,
+        // eslint-disable-next-line no-undef
+        `${__file}:${__line}${__function ? ` (${__function})` : ''}`,
+        rest,
+      );
     };
   });
 
