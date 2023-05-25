@@ -79,11 +79,20 @@ function create(conf) {
   conf = {
     prefix: undefined,
     level: 'info',
+    stderrLevel: '',
     stack: true,
     ...conf,
   };
 
   const colorize = conf.level !== 'off' && process.stdout.isTTY && !conf.json;
+  const stderrLevels = [];
+  if (conf.stderrLevel) {
+    stderrLevels.push('error');
+    if (conf.stderrLevel !== 'error') {
+      stderrLevels.push('warn');
+      if (!conf.stderrLevel.startsWith('warn')) stderrLevels.push('info');
+    }
+  }
 
   const locus = winston.format((info) => {
     // additional field
@@ -134,6 +143,7 @@ function create(conf) {
     transports: [
       new winston.transports.Console({
         level: conf.level,
+        stderrLevels,
         format: format.combine(
           format.timestamp(),
           label(),
@@ -187,18 +197,28 @@ if (false) {
     const log1 = logger.create({
       prefix: 'test',
       level: 'info',
+      stderrLevel: 'warning',
       json: true,
       stack: true,
     });
     const log2 = logger.create({
       // no prefix
       level: 'info',
+      // no stderrLevel
       json: false,
       stack: true,
     });
     const log3 = logger.create({
       prefix: 'no-info',
       level: 'warn',
+      stderrLevel: 'error',
+      json: false,
+      stack: false,
+    });
+    const log4 = logger.create({
+      prefix: 'all-to-stderr',
+      // no level,
+      stderrLevel: 'info',
       json: false,
       stack: false,
     });
@@ -207,13 +227,20 @@ if (false) {
     log1.warn('warning message', ['foo', 'bar'], 'second', undefined);
     log1.error(new Error('error message'), {nested: {foo: 'bar'}}, null);
 
+    console.log('');
     log2.info('information message');
     log2.warning('warning message');
     log2.error(new Error('error message'));
 
+    console.log('');
     log3.info('information message', {foo: 'bar'}, 2);
     log3.warn('warning message', ['foo', 'bar'], 'second', undefined);
     log3.error(new Error('error message'), {nested: {foo: 'bar'}}, null);
+
+    console.log('');
+    log4.info('information message', {foo: 'bar'}, 2);
+    log4.warn('warning message', ['foo', 'bar'], 'second', undefined);
+    log4.error(new Error('error message'), {nested: {foo: 'bar'}}, null);
   })();
 }
 
