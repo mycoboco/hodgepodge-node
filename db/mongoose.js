@@ -32,7 +32,6 @@ module.exports = (mongoose) => {
 
     // mongoose 6.x does not accept these defaults
     const promise = mongoose.createConnection(url, {
-      keepAlive: true,
       socketTimeoutMS: 0,
       ...conf.option,
     })
