@@ -19,7 +19,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "minify": "^11.0.1",
+    "minify": "^7.2.2",
     "node-sass": "^9.0.0"
   },
   "devDependencies": {
