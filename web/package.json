@@ -27,7 +27,7 @@
     "eslint-config-google": "^0.14.0"
   },
   "engines": {
-    "node": ">=20.15.1"
+    "node": ">=20.0.0"
   },
   "keywords": [
     "node.js server",
