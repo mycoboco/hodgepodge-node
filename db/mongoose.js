@@ -2,9 +2,9 @@
  *  connects to or disconnects from MongoDB
  */
 
-const hide = require('./hide');
+import hide from './hide.js';
 
-module.exports = (mongoose) => {
+export default function _(mongoose) {
   let db;
   let log;
 
@@ -16,7 +16,7 @@ module.exports = (mongoose) => {
     },
   ) => log = _log;
 
-  const connect = (conf, cb) => {
+  const connect = async (conf, cb) => {
     let url = 'mongodb://';
 
     if (conf.user && conf.password) url += `${conf.user}:${conf.password}@`;
@@ -30,26 +30,18 @@ module.exports = (mongoose) => {
 
     log.info(`connecting to ${hide(url)}`);
 
-    // mongoose 6.x does not accept these defaults
-    const promise = mongoose.createConnection(url, {
-      socketTimeoutMS: 0,
-      ...conf.option,
-    })
-      .asPromise()
-      .then((conn) => {
-        log.info(`connected to ${hide(url)}`);
-        db = conn;
-        if (cb) return cb(null, conn);
-        return conn;
-      })
-      .catch((err) => {
-        log.error(err);
-        if (db) db.close();
-        if (cb) return cb(err);
-        throw err;
-      });
-
-    if (!cb) return promise;
+    try {
+      const conn = await mongoose.createConnection(url, {
+        socketTimeoutMS: 0,
+        ...conf.option,
+      }).asPromise();
+      log.info(`connected to ${hide(url)}`);
+      db = conn;
+      return conn;
+    } catch (err) {
+      log.error(err);
+      throw err;
+    }
   };
 
   const close = () => {
@@ -64,35 +56,28 @@ module.exports = (mongoose) => {
     connect,
     close,
   };
-};
+}
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const option = {
-    host: '127.0.0.1',
-    port: 27017,
-    db: 'test',
-  };
-  const mongoose = require('mongoose');
-  const m = module.exports(mongoose);
-  m.init(console);
-  // eslint-disable-next-line no-constant-condition
-  if ('promise') {
-    m.connect(option)
-      .then((conn) => {
-        console.log(conn);
-        m.close();
-      })
-      .catch((err) => {
-        console.log(err);
-        m.close();
-      });
-  } else {
-    m.connect(option, (err, conn) => {
-      console.log(err, conn);
+  (async () => {
+    const option = {
+      host: '127.0.0.1',
+      port: 27017,
+      db: 'test',
+    };
+    const mongoose = await import('mongoose');
+    const m = _(mongoose);
+    try {
+      m.init(console);
+      const conn = await m.connect(option);
+      console.log(conn);
+    } catch (err) {
+      console.log(err);
+    } finally {
       m.close();
-    });
-  }
+    }
+  })();
 }
 
 // mongoose.js

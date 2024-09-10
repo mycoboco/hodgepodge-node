@@ -1,7 +1,11 @@
-module.exports = {
-  mongoose: require('./mongoose'),
-  mysql: require('./mysql'),
-  redis: require('./redis'),
+import mongoose from './mongoose';
+import mysql from './mysql';
+import redis from './redis';
+
+export {
+  mongoose,
+  mysql,
+  redis,
 };
 
 // end of index.js

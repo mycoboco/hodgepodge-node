@@ -2,15 +2,15 @@
  *  hides credentials from connection urls
  */
 
-module.exports = (url = '') => url.replace(
-  /([a-z]+:\/\/)?([^:]*)(:.+)?(@.*)/,
-  (_match, p1 = '', p2 = '', p3 = '', p4 = '') => `${p1}${p2}${(p3) ? ':???' : ''}${p4}`,
-);
+export default function hide(url = '') {
+  return url.replace(
+    /([a-z]+:\/\/)?([^:]*)(:.+)?(@.*)/,
+    (_match, p1 = '', p2 = '', p3 = '', p4 = '') => `${p1}${p2}${(p3) ? ':???' : ''}${p4}`,
+  );
+}
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const hide = module.exports;
-
   console.log(hide()); // empty
   console.log(hide('')); // empty
   console.log(hide('mysql://')); // mysql://

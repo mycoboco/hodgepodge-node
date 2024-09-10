@@ -2,11 +2,11 @@
  *  connects to or disconnects from MySQL
  */
 
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-const hide = require('./hide');
+import hide from './hide.js';
 
-module.exports = () => {
+export default function _() {
   let conn;
   let log;
 
@@ -18,7 +18,7 @@ module.exports = () => {
     },
   ) => log = _log;
 
-  const connect = (conf, cb) => {
+  const connect = async (conf) => {
     let url = 'mysql://';
 
     if (conf.user && conf.password) url += `${conf.user}:${conf.password}@`;
@@ -31,31 +31,19 @@ module.exports = () => {
       ...conf.option,
     });
 
-    const promise = conn.authenticate()
-      .then(() => {
-        log.info(`connected to ${hide(url)}`);
-        if (cb) return cb(null, conn);
-        return conn;
-      })
-      .catch((err) => {
-        log.error(err);
-        if (cb) return cb(err);
-        throw err;
-      });
-
-    if (!cb) return promise;
+    try {
+      await conn.authenticate();
+    } catch (err) {
+      log.error(err);
+      throw err;
+    }
+    log.info(`connected to ${hide(url)}`);
+    return conn;
   };
 
-  const sync = (cb) => {
-    const promise = conn.sync();
+  const sync = async () => conn.sync();
 
-    if (!cb) return promise;
-    promise
-      .then(() => cb())
-      .catch(cb);
-  };
-
-  const close = (cb = () => {}) => {
+  const close = () => {
     if (!conn) return;
 
     log.info('closing mysql connection');
@@ -70,36 +58,29 @@ module.exports = () => {
     sync,
     close,
   };
-};
+}
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const option = {
-    host: '127.0.0.1',
-    port: 3306,
-    db: 'test',
-    user: 'user',
-    password: 'password',
-  };
-  const m = module.exports();
-  m.init(console);
-  // eslint-disable-next-line no-constant-condition
-  if ('promise') {
-    m.connect(option)
-      .then((conn) => {
-        console.log(conn);
-        m.close();
-      })
-      .catch((err) => {
-        console.log(err);
-        m.close();
-      });
-  } else {
-    m.connect(option, (err, conn) => {
-      console.log(err, conn);
+  (async () => {
+    const option = {
+      host: '127.0.0.1',
+      port: 3306,
+      db: 'test',
+      user: 'user',
+      password: 'password',
+    };
+    const m = _();
+    m.init(console);
+    try {
+      const conn = await m.connect(option);
+      console.log(conn);
+    } catch (err) {
+      console.log(err);
+    } finally {
       m.close();
-    });
-  }
+    }
+  })();
 }
 
 // mysql.js

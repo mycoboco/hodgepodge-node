@@ -2,11 +2,11 @@
  *  connects to or disconnects from Redis
  */
 
-const redis = require('redis');
+import {createClient} from 'redis';
 
-const hide = require('./hide');
+import hide from './hide.js';
 
-module.exports = () => {
+export default function _() {
   let client;
   let log;
 
@@ -18,7 +18,7 @@ module.exports = () => {
     },
   ) => log = _log;
 
-  const connect = (conf, cb) => {
+  const connect = async (conf) => {
     let url = 'redis://';
 
     if (conf.user) url += conf.user;
@@ -27,27 +27,23 @@ module.exports = () => {
     url += `${conf.host}:${conf.port}/${conf.db}`;
 
     log.info(`connecting to ${hide(url)}`);
-    client = redis.createClient({
-      url,
-      ...conf.option,
-    });
-    client.on('error', (err) => log.error(err));
-    const promise = client.connect()
-      .then(() => {
-        log.info(`connected to redis(${conf.host}:${conf.port})`);
-        if (cb) return cb(null, client);
-        return client;
+    try {
+      client = await createClient({
+        url,
+        ...conf.option,
       })
-      .catch((err) => {
-        log.error(err);
-        if (cb) return cb(err);
-        throw err;
-      });
+        .on('error', (err) => log.error(err))
+        .connect();
+    } catch (err) {
+      log.error(err);
+      throw err;
+    }
 
-    if (!cb) return promise;
+    log.info(`connected to redis(${conf.host}:${conf.port})`);
+    return client;
   };
 
-  const close = async (cb) => {
+  const close = async () => {
     if (!client) return;
 
     log.info('closing redis connection');
@@ -56,7 +52,6 @@ module.exports = () => {
     } catch (_err) {
       // ignore
     }
-    if (cb) cb();
   };
 
   return {
@@ -64,34 +59,27 @@ module.exports = () => {
     connect,
     close,
   };
-};
+}
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const option = {
-    host: '127.0.0.1',
-    port: 6379,
-    db: 0,
-  };
-  const r = module.exports();
-  r.init(console);
-  // eslint-disable-next-line no-constant-condition
-  if ('promise') {
-    r.connect(option)
-      .then((client) => {
-        console.log(client);
-        r.close();
-      })
-      .catch((err) => {
-        console.log(err);
-        r.close();
-      });
-  } else {
-    r.connect(option, (err, client) => {
-      console.log(err, client);
-      r.close();
-    });
-  }
+  (async () => {
+    const option = {
+      host: '127.0.0.1',
+      port: 6379,
+      db: 0,
+    };
+    const redis = _();
+    redis.init(console);
+    try {
+      const client = await redis.connect(option);
+      console.log(client);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      redis.close();
+    }
+  })();
 }
 
 // end of redis.js

@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/db",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "a hodgepodge of db modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
@@ -18,18 +18,19 @@
     "email": "woong.jun@gmail.com"
   },
   "license": "MIT",
+  "type": "module",
   "dependencies": {
-    "mongoose": "^6.7.0",
-    "mysql2": "^2.3.3",
-    "redis": "^4.3.1",
-    "sequelize": "^6.25.3"
+    "mongoose": "^8.6.0",
+    "mysql2": "^3.11.0",
+    "redis": "^4.7.0",
+    "sequelize": "^6.37.3"
   },
   "devDependencies": {
-    "eslint": "^8.41.0",
+    "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0"
   },
   "engines": {
-    "node": ">=16.15.1"
+    "node": ">=20.0.0"
   },
   "keywords": [
     "node.js server",
