@@ -2,7 +2,7 @@
  *  drops privieges by chaning uid/gid
  */
 
-module.exports = (
+export default function _(
   runAs,
   log = {
     info: () => {},
@@ -10,8 +10,8 @@ module.exports = (
     error: () => {},
   },
   exit = () => {},
-) => {
-  if (runAs && runAs.uid && runAs.gid) {
+) {
+  if (runAs?.uid && runAs.gid) {
     try {
       log.info(`try to run as ${runAs.uid}:${runAs.gid}`);
       process.setgid(runAs.gid);
@@ -23,20 +23,22 @@ module.exports = (
   } else if (process.getuid() === 0 || process.getgid() === 0) {
     log.warning('server will run as root!');
   }
-};
+}
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const {username: user} = require('os').userInfo();
-  const drop = module.exports;
+  (async () => {
+    const {userInfo} = await import('os');
+    const {username: user} = userInfo();
 
-  drop(
-    {
-      uid: user,
-      gid: user,
-    },
-    console,
-  );
+    _(
+      {
+        uid: user,
+        gid: user,
+      },
+      console,
+    );
+  })();
 }
 
 // end of dropPrivilege.js

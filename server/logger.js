@@ -2,71 +2,54 @@
  *  logger wrapper for winston
  */
 
-// cannot 'use strict' due to arguments.callee
-
-const {inspect} = require('util');
+import {inspect} from 'node:util';
+import {dirname} from 'node:path';
 
 // eslint-disable-next-line no-unused-vars
-const colors = require('colors');
-const winston = require('winston');
-const {format} = require('logform');
+import colors from 'colors';
+import winston from 'winston';
+import {format} from 'logform';
+
 const SPLAT = Symbol.for('splat');
 
-const root = (() => {
-  const {dirname} = require('path');
-  const {constants, accessSync} = require('fs');
+function getter() {
+  const orig = Error.prepareStackTrace;
+  const err = new Error;
 
-  for (const p of module.paths) {
-    try {
-      const pkgDir = dirname(p);
-      accessSync(p, constants.F_OK);
-      return pkgDir;
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-})();
+  Error.prepareStackTrace = (_, stack) => stack;
+  Error.captureStackTrace(err, getter);
+  const {stack} = err;
+  Error.prepareStackTrace = orig;
+
+  return stack;
+}
 
 // adds global property to trace call stacks
-// eslint-disable-next-line no-prototype-builtins
-!global.hasOwnProperty('__stack') && Object.defineProperty(global, '__stack', {
-  get() {
-    const orig = Error.prepareStackTrace;
-    const err = new Error;
-
-    Error.prepareStackTrace = (_, stack) => stack;
-    // eslint-disable-next-line no-caller
-    Error.captureStackTrace(err, arguments.callee);
-    const {stack} = err;
-    Error.prepareStackTrace = orig;
-
-    return stack;
-  },
-});
+!Object.prototype.hasOwnProperty.call(global, '__stack') &&
+  Object.defineProperty(global, '__stack', {
+    get: getter,
+  });
 
 // adds global property to get line number
-// eslint-disable-next-line no-prototype-builtins
-!global.hasOwnProperty('__line') && Object.defineProperty(global, '__line', {
+!Object.prototype.hasOwnProperty.call(global, '__line') && Object.defineProperty(global, '__line', {
   get() {
-    // eslint-disable-next-line no-undef
-    return __stack[2].getLineNumber();
+    return global.__stack[2].getLineNumber();
   },
 });
 
 
 // adds global property to get function name
-// eslint-disable-next-line no-prototype-builtins
-!global.hasOwnProperty('__function') && Object.defineProperty(global, '__function', {
-  get() {
-    // eslint-disable-next-line no-undef
-    return __stack[2].getFunctionName();
-  },
-});
+!Object.prototype.hasOwnProperty.call(global, '__function') &&
+  Object.defineProperty(global, '__function', {
+    get() {
+      return global.__stack[2].getFunctionName();
+    },
+  });
 
 // adds global property to get file name
 !Object.prototype.hasOwnProperty.call(global, '__file') && Object.defineProperty(global, '__file', {
   get() {
-    // eslint-disable-next-line no-undef
-    return __stack[2].getFileName().substring(root.length + 1);
+    return global.__stack[2].getFileName().substring(dirname(import.meta.url).length + 1);
   },
 });
 
@@ -75,7 +58,7 @@ const root = (() => {
 //     level:  'info' || 'warn' || 'error' || 'off',
 //     stack:  true || false
 // }
-function create(conf) {
+export function create(conf) {
   conf = {
     prefix: undefined,
     level: 'info',
@@ -181,8 +164,7 @@ function create(conf) {
       original.call(
         logger,
         msg,
-        // eslint-disable-next-line no-undef
-        `${__file}:${__line}${__function ? ` (${__function})` : ''}`,
+        `${global.__file}:${global.__line}${global.__function ? ` (${global.__function})` : ''}`,
         rest,
       );
     };
@@ -191,36 +173,31 @@ function create(conf) {
   return logger;
 }
 
-module.exports = {
-  create,
-};
-
 // eslint-disable-next-line no-constant-condition
 if (false) {
   !(function test() {
-    const logger = module.exports;
-    const log1 = logger.create({
+    const log1 = create({
       prefix: 'test',
       level: 'info',
       stderrLevel: 'warning',
       json: true,
       stack: true,
     });
-    const log2 = logger.create({
+    const log2 = create({
       // no prefix
       level: 'info',
       // no stderrLevel
       json: false,
       stack: true,
     });
-    const log3 = logger.create({
+    const log3 = create({
       prefix: 'no-info',
       level: 'warn',
       stderrLevel: 'error',
       json: false,
       stack: false,
     });
-    const log4 = logger.create({
+    const log4 = create({
       prefix: 'all-to-stderr',
       // no level,
       stderrLevel: 'info',

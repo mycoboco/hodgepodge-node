@@ -2,17 +2,24 @@
  *  checks request parameters
  */
 
-const {inspect} = require('util');
+import {inspect} from 'node:util';
 
-const ServerError = require('./ServerError');
+import ServerError from './ServerError.js';
 
-module.exports = function assert(assertion, code, variable, value = assertion) {
+export default function assert(assertion, code, variable, value = assertion) {
   if (!assertion) {
     const err = new ServerError(code, `invalid ${variable}: ${inspect(value)}`);
     throw err;
   }
 
   return {and: assert};
-};
+}
+
+// eslint-disable-next-line no-constant-condition
+if (false) {
+  assert(null === null, 500, 'null').
+    // eslint-disable-next-line use-isnan
+    and(NaN === NaN, 500, 'NaN');
+}
 
 // end of checkParams.js

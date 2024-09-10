@@ -2,7 +2,7 @@
  *  server errors
  */
 
-class ServerError extends Error {
+export default class ServerError extends Error {
   constructor(code, message) {
     if (!isFinite(code)) {
       message = code;
@@ -23,7 +23,5 @@ class ServerError extends Error {
     this.statusCode = code;
   }
 }
-
-module.exports = ServerError;
 
 // end of ServerError.js

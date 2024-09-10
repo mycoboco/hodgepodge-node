@@ -2,7 +2,7 @@
  *  continues routing only on debug mode
  */
 
-module.exports = (debug) => {
+export default function _(debug) {
   if (typeof debug !== 'boolean') {
     debug = (process.env.NODE_ENV !== 'production');
   }
@@ -12,6 +12,6 @@ module.exports = (debug) => {
 
     res.send(404);
   };
-};
+}
 
 // end of checkDebug.js

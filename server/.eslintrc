@@ -3,7 +3,8 @@
     "eslint:recommended", "google"
   ],
   "parserOptions": {
-    "ecmaVersion": 12
+    "ecmaVersion": 12,
+    "sourceType": "module"
   },
   "rules": {
     "arrow-body-style": [
@@ -45,7 +46,7 @@
   "env": {
     "node": true,
     "commonjs": true,
-    "es2021": true,
+    "es6": true,
     "mocha": true
   }
 }

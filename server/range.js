@@ -2,7 +2,7 @@
  *  handles range information from HTTP headers
  */
 
-function parse(range, stats) {
+export function parse(range, stats) {
   const p = (r) => {
     r = /bytes=([0-9]+)-([0-9]+)?/.exec(r);
     if (!r) return null;
@@ -13,26 +13,18 @@ function parse(range, stats) {
     };
   };
 
-  if (!range) return null;
-
   const r = p(range);
-  if (r) {
-    if (r.e !== r.e) r.e = stats.size - 1;
-    if (r.s >= stats.size || r.e >= stats.size || r.s > r.e) {
-      return new Error(`invalid range request: ${range}`);
-    }
+  if (!r) return null;
+  if (isNaN(r.e)) r.e = stats.size - 1;
+  if (r.s >= stats.size || r.e >= stats.size || r.s > r.e) {
+    return new Error(`invalid range request: ${range}`);
   }
 
   return r;
 }
 
-function header(r, stats) {
+export function header(r, stats) {
   return `bytes ${r.s}-${r.e}/${stats.size}`;
 }
-
-module.exports = {
-  parse,
-  header,
-};
 
 // end of range.js

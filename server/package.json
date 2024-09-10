@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/server",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "description": "a hodgepodge of server modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
@@ -18,19 +18,20 @@
     "email": "woong.jun@gmail.com"
   },
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "colors": "^1.4.0",
     "ip-range-check": "^0.2.0",
-    "logform": "^2.4.2",
-    "serve-static-restify": "^3.0.0",
-    "winston": "^3.8.2"
+    "logform": "^2.6.1",
+    "serve-static-restify": "2.1.0",
+    "winston": "^3.14.2"
   },
   "devDependencies": {
-    "eslint": "^8.41.0",
+    "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0"
   },
   "engines": {
-    "node": ">=16.15.1"
+    "node": ">=20.0.0"
   },
   "keywords": [
     "node.js server",
