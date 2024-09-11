@@ -1,23 +1,11 @@
-import ServerError from './ServerError.js';
-import checkParams from './checkParams.js';
-import checkHealth from './checkHealth.js';
-import checkDebug from './checkDebug.js';
-import dropPrivilege from './dropPrivilege.js';
-import getReqIp from './getReqIp.js';
-import * as logger from './logger.js';
-import * as range from './range.js';
-import allowLocalOnly from './allowLocalOnly.js';
-
-export {
-  ServerError,
-  checkParams,
-  checkHealth,
-  checkDebug,
-  dropPrivilege,
-  getReqIp,
-  logger,
-  range,
-  allowLocalOnly,
-};
+export {default as ServerError} from './ServerError.js';
+export {default as checkParams} from './checkParams.js';
+export {default as checkHealth} from './checkHealth.js';
+export {default as checkDebug} from './checkDebug.js';
+export {default as dropPrivilege} from './dropPrivilege.js';
+export {default as getReqIp} from './getReqIp.js';
+export * as logger from './logger.js';
+export * as range from './range.js';
+export {default as allowLocalOnly} from './allowLocalOnly.js';
 
 // end of index.js
