@@ -2,13 +2,13 @@
  *  recursive fs.watch()
  */
 
-const fs = require('fs/promises');
-const path = require('path');
-const EventEmitter = require('events');
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import EventEmitter from 'node:events';
 
-const pLimit = require('p-limit');
+import pLimit from 'p-limit';
 
-module.exports = function watch(dirs, opts = {}, _emitter = new EventEmitter()) {
+export default function watch(dirs, opts = {}, _emitter = new EventEmitter()) {
   if (typeof dirs === 'string') dirs = [dirs];
 
   const ds = [...dirs];
@@ -90,12 +90,11 @@ module.exports = function watch(dirs, opts = {}, _emitter = new EventEmitter()) 
     });
 
   return _emitter;
-};
+}
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const w = module.exports;
-  const emitter = w('test', {ignoreHiddenDirs: true})
+  const emitter = watch('test', {ignoreHiddenDirs: true})
     .on('change', () => console.log('changed'))
     .on('error', (err) => console.log(err || 'error'));
   setInterval(() => {

@@ -3,11 +3,11 @@
  *      see https://github.com/nodejs/node/issues/25335
  */
 
-module.exports = (rs, ws, _handler) => {
+export default (rs, ws, _handler) => {
   const handler = (err) => {
     rs.unpipe(ws);
     ws.end();
-    if (_handler) _handler(err);
+    _handler?.(err);
   };
 
   ws.on('unpipe', () => rs.once('readable', () => rs.destroy()));

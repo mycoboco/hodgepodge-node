@@ -2,9 +2,9 @@
  *  konphyg wrapper
  */
 
-const path = require('path');
+import path from 'node:path';
 
-const konfig = require('konphyg');
+import konfig from 'konphyg';
 
 function traverse(obj, key, decrypt) {
   const cur = obj[key];
@@ -23,7 +23,7 @@ function traverse(obj, key, decrypt) {
   }
 }
 
-module.exports = (p = 'config', _conf, opt) => {
+export default function _(p = 'config', _conf, opt) {
   const conf = {};
   const config = konfig(p);
 
@@ -37,15 +37,14 @@ module.exports = (p = 'config', _conf, opt) => {
     };
   });
 
-  if (opt && opt.supportEnv) traverse({conf}, 'conf', opt.decrypt);
+  if (opt?.supportEnv) traverse({conf}, 'conf', opt.decrypt);
 
   return conf;
-};
+}
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const c = module.exports;
-  console.log(c(path.join('.', 'test'), {
+  console.log(_(path.join('.', 'test'), {
     'foo': {
       'param': 1,
     },

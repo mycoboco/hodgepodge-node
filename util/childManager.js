@@ -5,7 +5,7 @@
 const childs = [];
 const debug = false;
 
-function add(child) {
+export function add(child) {
   const handler = () => remove(child);
 
   if (debug) console.log(`adding ${child.pid}`);
@@ -18,7 +18,7 @@ function add(child) {
   return child;
 }
 
-function remove(child) {
+export function remove(child) {
   const i = childs.findIndex((c) => c.handle === child);
   if (i < 0) return;
   if (debug) console.log(`removing ${child.pid}`);
@@ -27,18 +27,12 @@ function remove(child) {
   return child;
 }
 
-function clean() {
+export function clean() {
   childs.forEach((c) => {
     c.handle.removeListener('exit', c.handler);
     if (debug) console.log(`killing ${c.handle.pid}`);
     c.handle.kill(); // may be unsafe or not work
   });
 }
-
-module.exports = {
-  add,
-  remove,
-  clean,
-};
 
 // end of childManager.js

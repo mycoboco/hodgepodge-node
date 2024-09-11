@@ -1,9 +1,15 @@
-module.exports = {
-  config: require('./config'),
-  assert: require('./assert'),
-  safePipe: require('./safePipe'),
-  childManager: require('./childManager'),
-  recursiveWatch: require('./recursiveWatch'),
+import * as config from './config.js';
+import * as assert from './assert.js';
+import safePipe from './safePipe.js';
+import * as childManager from './childManager.js';
+import * as recursiveWatch from './recursiveWatch.js';
+
+export {
+  config,
+  assert,
+  safePipe,
+  childManager,
+  recursiveWatch,
 };
 
 // end of index.js
