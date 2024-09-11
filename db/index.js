@@ -1,11 +1,5 @@
-import mongoose from './mongoose';
-import mysql from './mysql';
-import redis from './redis';
-
-export {
-  mongoose,
-  mysql,
-  redis,
-};
+export {default as mongoose} from './mongoose';
+export {default as mysql} from './mysql';
+export {default as redis} from './redis';
 
 // end of index.js
