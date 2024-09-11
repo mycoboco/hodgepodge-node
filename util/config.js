@@ -2,7 +2,7 @@
  *  konphyg wrapper
  */
 
-import path from 'node:path';
+import * as path from 'node:path';
 
 import konfig from 'konphyg';
 
