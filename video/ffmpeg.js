@@ -2,13 +2,13 @@
  *  ffmpeg driver
  */
 
-const fs = require('fs/promises');
-const os = require('os');
-const path = require('path');
-const {spawn, execFile: execf} = require('child_process');
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import {spawn, execFile as execf} from 'node:child_process';
 
-const mime = require('mime');
-const pLimit = require('p-limit');
+import mime from 'mime';
+import pLimit from 'p-limit';
 
 let dir;
 let log;
@@ -16,7 +16,7 @@ let childManager;
 const temps = [];
 const ncpu = os.cpus().length;
 
-function init(_dir, _log, _childManager) {
+export function init(_dir, _log, _childManager) {
   if (typeof _dir === 'string') {
     _dir = {
       ffmpeg: _dir,
@@ -28,17 +28,12 @@ function init(_dir, _log, _childManager) {
   childManager = _childManager || {add: (x) => x};
 }
 
-function secsFromString(s) {
-  const t = /([0-9]+):([0-9]+):([0-9.]+)/.exec(s);
-  if (t) return (+t[1] * 60 * 60) + (+t[2] * 60) + +t[3];
-}
-
-function frame(p, trims) {
+export async function frame(p, trims) {
   const opts = [
     '-nostats',
     '-i', p,
-    ...(trims && trims[0] >= 0 ? ['-ss', trims[0]] : [null]),
-    ...(trims && trims[1] > 0 ? ['-t', trims[1] - trims[0]] : [null]),
+    ...(trims?.[0] >= 0 ? ['-ss', trims[0]] : [null]),
+    ...(trims?.[1] > 0 ? ['-t', trims[1] - trims[0]] : [null]),
     '-vcodec', 'copy',
     '-f', 'null',
     '-y', '/dev/null',
@@ -68,7 +63,12 @@ function frame(p, trims) {
   });
 }
 
-function probe(ps) {
+function secsFromString(s) {
+  const t = /([0-9]+):([0-9]+):([0-9.]+)/.exec(s);
+  if (t) return (+t[1] * 60 * 60) + (+t[2] * 60) + +t[3];
+}
+
+export async function probe(ps) {
   ps = Array.isArray(ps) ? ps : [ps];
 
   return Promise.all(
@@ -168,7 +168,7 @@ function probe(ps) {
   );
 }
 
-function drive(t, opts, progress) {
+async function drive(t, opts, progress) {
   opts = [
     '-probesize', '2147483647',
     '-analyzeduration', '2147483647',
@@ -221,10 +221,10 @@ function constructOpts(input, _opt, accepts, cmds) {
   });
   Object.keys(_opt).forEach((key) => log.warning(`unsupported option: ${key}`));
 
-  if (opt.trims && opt.trims[0] >= 0) opts.push('-ss', opt.trims[0]);
+  if (opt.trims?.[0] >= 0) opts.push('-ss', opt.trims[0]);
   opts = [...opts, ...input];
-  if (opt.trims && opt.trims[1] > 0) {
-    opts.push('-t', (opt.trims[1] - opt.trims[0]) / (opt.playrate || 1));
+  if (opt.trims?.[1] > 0) {
+    opts.push('-t', (opt.trims[1] - opt.trims[0]) / (opt.playrate ?? 1));
   }
   if (opt.keepMetadata) opts.push('-map_metadata', 0);
   if (typeof opt.rotate !== 'number' && opt.resetRotate) opt.rotate = 0;
@@ -267,7 +267,7 @@ function progressHandler(s, e, duration, cb) {
   };
 }
 
-async function copy(s, t, opt, progress) {
+export async function copy(s, t, opt, progress) {
   const accepts = [
     'mute', 'rotate', 'resetRotate', 'fastStart', 'trims', 'keepMetadata', 'createTime',
   ];
@@ -289,14 +289,14 @@ async function copy(s, t, opt, progress) {
     return drive(
       t,
       opts,
-      progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress),
+      progressHandler(trims?.[0], trims?.[1], info[0].duration, progress),
     );
   } else {
     return drive(t, opts);
   }
 }
 
-async function compress(s, t, opt, progress) {
+export async function compress(s, t, opt, progress) {
   const accepts = [
     'mute', 'resolution', 'scale', 'fps', 'rotate', 'hardRotate', 'resetRotate', 'fastStart',
     'trims', 'crf', 'vbv', 'keepMetadata', 'createTime',
@@ -320,7 +320,7 @@ async function compress(s, t, opt, progress) {
     return drive(
       t,
       opts,
-      progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress),
+      progressHandler(trims?.[0], trims?.[1], info[0].duration, progress),
     );
   } else {
     return drive(t, opts);
@@ -331,7 +331,7 @@ function clean() {
   temps.forEach((temp) => fs.unlink(temp).catch(() => {}));
 }
 
-async function merge(ss, t, opt, progress) {
+export async function merge(ss, t, opt, progress) {
   const accepts = ['mute', 'rotate', 'resetRotate', 'fastStart', 'unsafe', 'createTime'];
 
   const listFile = path.join(os.tmpdir(), `${process.pid}-${Math.floor(Math.random() * 1000000)}`);
@@ -381,7 +381,7 @@ async function merge(ss, t, opt, progress) {
   }
 }
 
-async function playrate(s, t, opt, progress) {
+export async function playrate(s, t, opt, progress) {
   const accepts = [
     'resolution', 'scale', 'fps', 'rotate', 'hardRotate', 'resetRotate', 'fastStart', 'trims',
     'crf', 'vbv', 'playrate', 'keepMetadata', 'createTime',
@@ -407,8 +407,8 @@ async function playrate(s, t, opt, progress) {
       t,
       opts,
       progressHandler(
-        (trims && trims[0]) / playrate,
-        (trims && trims[1]) / playrate,
+        trims?.[0] / playrate,
+        trims?.[1] / playrate,
         info[0].duration / playrate,
         progress,
       ),
@@ -418,7 +418,7 @@ async function playrate(s, t, opt, progress) {
   }
 }
 
-async function thumbnail(s, t, opt) {
+export async function thumbnail(s, t, opt) {
   const accepts = ['resolution', 'scale', 'trims', 'quality', 'mapper'];
 
   let tname = (t, i) => {
@@ -470,18 +470,18 @@ async function thumbnail(s, t, opt) {
   return Promise.all(funcs);
 }
 
-async function preview(s, t, opt) {
+export async function preview(s, t, opt) {
   const accepts = ['trims', 'number', 'fps', 'height', 'quality', 'blank'];
 
   if (Array.isArray(s)) [s] = s;
 
   const tmp = path.join(os.tmpdir(), `${path.basename(t)}-tmp.mp4`);
   temps.push(tmp);
-  const height = opt.height || 120;
+  const height = opt.height ?? 120;
   let number;
   let fps;
   if (typeof opt.fps === 'number') ({fps} = opt);
-  else number = opt.number || 100;
+  else number = opt.number ?? 100;
 
   const info = await probe(s);
   let opts;
@@ -520,10 +520,10 @@ async function preview(s, t, opt) {
       ]);
     } else {
       nframe = Math.min(
-        opt.trims && opt.trims[1] > 0 ? opt.trims[1] : info[0].duration,
+        opt.trims?.[1] > 0 ? opt.trims[1] : info[0].duration,
         info[0].duration,
       );
-      if (opt.trims && opt.trims[0] >= 0) nframe -= opt.trims[0];
+      if (opt.trims?.[0] >= 0) nframe -= opt.trims[0];
       number = Math.max(1, Math.floor(nframe / fps));
       opts = constructOpts(['-i', s], opt, accepts, [
         '-frames', '1',
@@ -543,7 +543,7 @@ async function preview(s, t, opt) {
       });
   };
 
-  if (typeof number === 'number' && opt.trims && (opt.trims[0] >= 0 || opt.trims[1] > 0)) {
+  if (typeof number === 'number' && (opt.trims?.[0] >= 0 || opt.trims?.[1] > 0)) {
     const f = await frame(s, opt.trims); // counts # of frames of trimmed one
     return perform(f);
   } else {
@@ -551,7 +551,7 @@ async function preview(s, t, opt) {
   }
 }
 
-async function watermark(s, o, t, opt, progress) {
+export async function watermark(s, o, t, opt, progress) {
   const accepts = [
     'mute', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv', 'position', 'margins',
     'keepMetadata', 'createTime',
@@ -598,14 +598,14 @@ async function watermark(s, o, t, opt, progress) {
     const info = await probe(s);
     return drive(
       t, opts,
-      progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress),
+      progressHandler(trims?.[0], trims?.[1], info[0].duration, progress),
     );
   } else {
     return drive(t, opts);
   }
 }
 
-function vidstab(s, t, opt, progress) {
+export async function vidstab(s, t, opt, progress) {
   const accepts = [
     'mute', 'resolution', 'scale', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
     'detect', 'transform', 'unsharp', 'keepMetadata', 'createTime',
@@ -639,11 +639,11 @@ function vidstab(s, t, opt, progress) {
     '-vcodec', 'libx264',
   ]);
 
-  const perform = (info) => {
+  const perform = async (info) => {
     const _opts = [];
-    if (trims && trims[0] >= 0) _opts.push('-ss', trims[0]);
+    if (trims?.[0] >= 0) _opts.push('-ss', trims[0]);
     _opts.push('-i', s);
-    if (trims && trims[1] > 0) _opts.push('-t', trims[1] - trims[0]);
+    if (trims?.[1] > 0) _opts.push('-t', trims[1] - trims[0]);
     _opts.push(
       '-vf', `vidstabdetect=result=${trf}${opt2str(detect)}`,
       '-f', 'null',
@@ -652,14 +652,14 @@ function vidstab(s, t, opt, progress) {
     return drive(
       '-', _opts,
       info && progressHandler(
-        trims && trims[0], trims && trims[1], info[0].duration, (p) => progress(p / 2),
+        trims?.[0], trims?.[1], info[0].duration, (p) => progress(p / 2),
       ),
     )
       .then(() => drive(
         t, opts,
         info && progressHandler(
-          trims && trims[0],
-          trims && trims[1],
+          trims?.[0],
+          trims?.[1],
           info[0].duration,
           (p) => progress(0.5 + (p / 2)),
         ),
@@ -677,7 +677,7 @@ function vidstab(s, t, opt, progress) {
   return progress ? probe(s).then(perform) : perform();
 }
 
-async function blur(s, t, opt, progress) {
+export async function blur(s, t, opt, progress) {
   const accepts = [
     'mute', 'resolution', 'scale', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv',
     'type', 'blurs', 'keepMetadata', 'createTime',
@@ -726,11 +726,11 @@ async function blur(s, t, opt, progress) {
 
   return drive(
     t, opts,
-    progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress),
+    progressHandler(trims?.[0], trims?.[1], info[0].duration, progress),
   );
 }
 
-async function landscape(s, t, opt, progress) {
+export async function landscape(s, t, opt, progress) {
   const accepts = [
     'mute', 'resolution', 'rotate', 'resetRotate', 'fastStart', 'trims', 'crf', 'vbv', 'type',
     'blurs', 'keepMetadata', 'createTime',
@@ -767,11 +767,11 @@ async function landscape(s, t, opt, progress) {
 
   return drive(
     t, opts,
-    progressHandler(trims && trims[0], trims && trims[1], info[0].duration, progress),
+    progressHandler(trims?.[0], trims?.[1], info[0].duration, progress),
   );
 }
 
-async function amix(s, a, t, opt, progress) {
+export async function amix(s, a, t, opt, progress) {
   const accepts = ['volumes', 'keepMetadata', 'createTime'];
 
   opt = {
@@ -808,30 +808,14 @@ async function amix(s, a, t, opt, progress) {
   return drive(t, opts, progressHandler(null, null, infos[0].duration, progress));
 }
 
-module.exports = {
-  init,
-  probe,
-  copy,
-  compress,
-  merge,
-  playrate,
-  thumbnail,
-  preview,
-  watermark,
-  vidstab,
-  blur,
-  landscape,
-  amix,
-};
-
 // eslint-disable-next-line no-constant-condition
 if (false) {
   (async function() {
-    const path = require('path');
-    const childManager = require('../util/childManager');
-    const f = module.exports;
+    const path = await import('node:path');
+    const childManager = await import('../util/childManager.js');
+
     const test = path.join('.', 'test', 'sample.mp4');
-    const watermark = path.join('.', 'test', 'watermark.png');
+    const water = path.join('.', 'test', 'watermark.png');
     const audio = path.join('.', 'test', 'sample.mp3');
 
     process.on('SIGINT', () => {
@@ -840,49 +824,49 @@ if (false) {
     });
 
     try {
-      f.init({
+      init({
         ffmpeg: '/Users/pooh/Project/var/ffmpeg/node_modules/ffmpeg-static',
         ffprobe: '/Users/pooh/Project/var/ffprobe/node_modules/ffprobe-static/bin/darwin/x64',
       }, null, childManager);
 
-      console.log(await f.probe(test));
+      console.log(await probe(test));
       console.log(
-        await f.copy(test, 'sample-copy.mp4', {rotate: 90}, (p) => console.log(`copy: ${p}`)),
+        await copy(test, 'sample-copy.mp4', {rotate: 90}, (p) => console.log(`copy: ${p}`)),
       );
       console.log(
-        await f.compress(test, 'sample-comp.mp4', {
+        await compress(test, 'sample-comp.mp4', {
           crf: 35,
           hardRotate: 270,
         }, (p) => console.log(`compress: ${p}`)),
       );
       console.log(
-        await f.playrate(test, 'sample-rate.mp4', {
+        await playrate(test, 'sample-rate.mp4', {
           playrate: 0.5,
           hardRotate: 180,
           scale: '640:-2',
         }, (p) => console.log(`playrate: ${p}`)),
       );
-      console.log(await f.thumbnail(test, 'sample.jpg', {thumbnails: [1, 4]}));
-      console.log(await f.preview(test, 'sample-prv.jpg', {number: 10}));
-      console.log(await f.preview(test, 'sample-trim-prv.jpg', {number: 10, trims: [0, 3]}));
+      console.log(await thumbnail(test, 'sample.jpg', {thumbnails: [1, 4]}));
+      console.log(await preview(test, 'sample-prv.jpg', {number: 10}));
+      console.log(await preview(test, 'sample-trim-prv.jpg', {number: 10, trims: [0, 3]}));
       console.log(
-        await f.watermark(test, watermark, 'sample-wm.mp4', {margins: [10, 10]},
+        await watermark(test, water, 'sample-wm.mp4', {margins: [10, 10]},
           (p) => console.log(`watermark: ${p}`)),
       );
-      console.log(await f.vidstab(test, 'sample-vid.mp4', {}, (p) => console.log(`vidstab: ${p}`)));
+      console.log(await vidstab(test, 'sample-vid.mp4', {}, (p) => console.log(`vidstab: ${p}`)));
       console.log(
-        await f.blur(test, 'sample-blur.mp4', {crf: 35}, (p) => console.log(`blur: ${p}`)),
+        await blur(test, 'sample-blur.mp4', {crf: 35}, (p) => console.log(`blur: ${p}`)),
       );
       console.log(
-        await f.landscape('sample-copy.mp4', 'sample-landscape.mp4', {},
+        await landscape('sample-copy.mp4', 'sample-landscape.mp4', {},
           (p) => console.log(`landscape: ${p}`)),
       );
       console.log(
-        await f.amix(test, audio, 'sample-amix.mp4', {volumes: [0, 1]},
+        await amix(test, audio, 'sample-amix.mp4', {volumes: [0, 1]},
           (p) => console.log(`amix: ${p}`)),
       );
       console.log(
-        await f.merge(
+        await merge(
           [path.resolve('sample-amix.mp4'), path.resolve('sample-amix.mp4')],
           'sample-merge.mp4', {crf: 35}, (p) => console.log(`merge: ${p}`),
         ),

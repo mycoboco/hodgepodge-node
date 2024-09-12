@@ -1,5 +1,3 @@
-module.exports = {
-  ffmpeg: require('./ffmpeg'),
-};
+export * as ffmpeg from './ffmpeg.js';
 
 // end of index.js
