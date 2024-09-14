@@ -16,7 +16,7 @@ export default function _(mongoose) {
     },
   ) => log = _log;
 
-  const connect = async (conf, cb) => {
+  const connect = async (conf) => {
     let url = 'mongodb://';
 
     if (conf.user && conf.password) url += `${conf.user}:${conf.password}@`;
