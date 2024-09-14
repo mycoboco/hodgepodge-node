@@ -10,7 +10,7 @@ export default function _(url = '') {
 }
 
 // eslint-disable-next-line no-constant-condition
-if (!false) {
+if (false) {
   console.log(_()); // empty
   console.log(_('')); // empty
   console.log(_('mysql://')); // mysql://
