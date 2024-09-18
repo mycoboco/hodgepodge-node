@@ -18,13 +18,13 @@
     "email": "woong.jun@gmail.com"
   },
   "license": "MIT",
+  "type": "module",
   "dependencies": {
-    "minify": "^7.2.2",
-    "node-sass": "^9.0.0"
+    "minify": "^11.4.0",
+    "sass": "^1.78.0"
   },
   "devDependencies": {
-    "eslint": "^8.41.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint": "^8.57.0"
   },
   "engines": {
     "node": ">=20.0.0"

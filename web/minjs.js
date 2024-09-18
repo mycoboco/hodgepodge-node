@@ -2,15 +2,15 @@
  *  minifies and servers js
  */
 
-const fs = require('fs/promises');
-const path = require('path');
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 
-const minify = require('minify');
+import {minify} from 'minify';
 
 let pub;
 let log;
 
-function serve(
+export function serve(
   _pub = 'public',
   _log = {
     info: () => {},
@@ -21,7 +21,7 @@ function serve(
   pub = _pub;
   log = _log;
 
-  return async (req, res, _next) => {
+  return async (req, res) => {
     const dir = path.dirname(req.url);
     const name = path.basename(req.url).substring(1); // foo.js from _foo.js
 
@@ -36,21 +36,15 @@ function serve(
   };
 }
 
-function filter(req, res, next) {
+export function filter(req, res, next) {
   if (/(?:.*\/|^)\+[^/]+\.js$/.test(req.path)) { // blocks +foo.js
     return res.sendStatus(404);
   }
   next();
 }
 
-module.exports = {
-  serve,
-  filter,
-};
-
 // eslint-disable-next-line no-constant-condition
-if (false) {
-  const m = module.exports;
+if (!false) {
   const res = {
     header: (k, v) => {
       console.log(k, v);
@@ -60,8 +54,8 @@ if (false) {
     },
   };
 
-  m.serve('test', console)({url: '_foo.js'}, res);
-  m.filter({path: 'test/+foo.js'}, {sendStatus: (c) => console.log(c)});
+  serve('test', console)({url: '_foo.js'}, res);
+  filter({path: 'test/+foo.js'}, {sendStatus: (c) => console.log(c)});
 }
 
 // end of minjs.js

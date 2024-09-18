@@ -2,15 +2,15 @@
  *  compiles and servers scss
  */
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
-const sass = require('node-sass');
+import * as sass from 'sass';
 
 let pub;
 let log;
 
-function serve(
+export function serve(
   _pub = 'public',
   _log = {
     info: () => {},
@@ -25,36 +25,30 @@ function serve(
     const dir = path.dirname(req.url);
     const name = path.basename(req.url, path.extname(req.url)).substring(1); // foo from _foo.css
 
-    sass.render({
-      file: path.join(pub, dir, `+${name}.scss`),
-      outputStyle: 'compressed',
-    }, (err, result) => {
-      if (err) {
-        log.error(err);
-        return next();
-      }
+    try {
+      const {css} = sass.compile(
+        path.join(pub, dir, `+${name}.scss`),
+        {style: 'compressed'},
+      );
       res.header('Content-type', 'text/css')
-        .send(result.css);
-      fs.writeFile(path.join(pub, req.url), result.css, (err) => log.error(err));
-    });
+        .send(css);
+      fs.writeFile(path.join(pub, req.url), css, (err) => log.error(err));
+    } catch (err) {
+      log.error(err);
+      return next();
+    }
   };
 }
 
-function filter(req, res, next) {
+export function filter(req, res, next) {
   if (/(?:.*\/|^)\+[^/]+\.scss$/.test(req.path)) { // blocks +foo.scss
     return res.sendStatus(404);
   }
   next();
 }
 
-module.exports = {
-  serve,
-  filter,
-};
-
 // eslint-disable-next-line no-constant-condition
 if (false) {
-  const s = module.exports;
   const res = {
     header: (k, v) => {
       console.log(k, v);
@@ -64,8 +58,8 @@ if (false) {
     },
   };
 
-  s.serve('test', console)({url: '_foo.css'}, res);
-  s.filter({path: 'test/+foo.scss'}, {sendStatus: (c) => console.log(c)});
+  serve('test', console)({url: '_foo.css'}, res);
+  filter({path: 'test/+foo.scss'}, {sendStatus: (c) => console.log(c)});
 }
 
 // end of sass.js
