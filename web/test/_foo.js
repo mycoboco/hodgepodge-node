@@ -1,0 +1,1 @@
+function a(A){if(A<2)return A;return a(A-1)+a(A-2)}var b=prompt('Enter the number of terms: ');if(b<=0)console.log('Enter a positive integer.');else for(let i=0;i<b;i++)console.log(a(i));
