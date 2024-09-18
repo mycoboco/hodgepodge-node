@@ -44,7 +44,7 @@ export function filter(req, res, next) {
 }
 
 // eslint-disable-next-line no-constant-condition
-if (!false) {
+if (false) {
   const res = {
     header: (k, v) => {
       console.log(k, v);
