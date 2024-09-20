@@ -3,7 +3,13 @@
  */
 
 import {inspect} from 'node:util';
-import {dirname} from 'node:path';
+import {
+  dirname,
+  basename,
+  sep,
+  join,
+} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
 // eslint-disable-next-line no-unused-vars
 import colors from 'colors';
@@ -11,6 +17,24 @@ import winston from 'winston';
 import {format} from 'logform';
 
 const SPLAT = Symbol.for('splat');
+
+const removePrefix = (() => {
+  const cs = dirname(fileURLToPath(import.meta.url)).split(sep);
+
+  return (u) => {
+    u = fileURLToPath(u);
+    const d = dirname(u);
+    const f = basename(u);
+    const ds = dirname(u).split(sep);
+
+    let i;
+    for (i = 0; i < Math.min(cs.length, ds.length); i++) {
+      if (cs[i] !== ds[i]) break;
+    }
+
+    return join(d.substring(cs.slice(0, i).join('/').length), f);
+  };
+})();
 
 function getter() {
   const orig = Error.prepareStackTrace;
@@ -49,7 +73,7 @@ function getter() {
 // adds global property to get file name
 !Object.prototype.hasOwnProperty.call(global, '__file') && Object.defineProperty(global, '__file', {
   get() {
-    return global.__stack[2].getFileName().substring(dirname(import.meta.url).length + 1);
+    return removePrefix(global.__stack[2].getFileName());
   },
 });
 
