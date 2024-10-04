@@ -19,6 +19,7 @@
   },
   "license": "MIT",
   "type": "module",
+  "main": "index.js",
   "dependencies": {
     "minify": "^11.4.0",
     "sass": "^1.78.0"

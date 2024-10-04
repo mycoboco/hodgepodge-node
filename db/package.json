@@ -19,6 +19,7 @@
   },
   "license": "MIT",
   "type": "module",
+  "main": "index.js",
   "dependencies": {
     "mongoose": "^8.6.0",
     "mysql2": "^3.11.0",
