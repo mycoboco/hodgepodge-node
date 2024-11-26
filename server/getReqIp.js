@@ -128,6 +128,30 @@ if (false) {
       },
     }),
   );
+  console.log(
+    _({
+      headers: {},
+      connection: {
+        remoteAddress: '::1',
+      },
+    }),
+  );
+  console.log(
+    _({
+      headers: {},
+      connection: {
+        remoteAddress: '2001:0db8:0001:0000:0000:0ab9:C0A8:0102',
+      },
+    }),
+  );
+  console.log(
+    _({
+      headers: {},
+      connection: {
+        remoteAddress: '2001:db8::1234:5678:5.6.7.8',
+      },
+    }),
+  );
 }
 
 // end of getReqIp.js
