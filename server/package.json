@@ -1,6 +1,6 @@
 {
   "name": "@hodgepodge-node/server",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "a hodgepodge of server modules to help implement node.js servers",
   "author": {
     "name": "Woong Jun",
