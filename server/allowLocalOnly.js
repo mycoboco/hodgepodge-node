@@ -8,7 +8,7 @@ import ServerError from './ServerError.js';
 
 export default function _(req, _res, next) {
   const ip = getReqIp(req);
-  if (ipRangeCheck(ip, ['192.168.0.1/24', '127.0.0.1'])) return next();
+  if (ipRangeCheck(ip, ['192.168.0.1/24', '127.0.0.1', '::1'])) return next();
   next(new ServerError(400, `unauthorized access from ${ip}`));
 }
 
