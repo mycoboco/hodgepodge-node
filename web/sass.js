@@ -2,7 +2,7 @@
  *  compiles and servers scss
  */
 
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import * as sass from 'sass';
@@ -32,7 +32,8 @@ export function serve(
       );
       res.header('Content-type', 'text/css')
         .send(css);
-      fs.writeFile(path.join(pub, req.url), css, (err) => log.error(err));
+      fs.writeFile(path.join(pub, req.url), css)
+        .catch((err) => log.error(err));
     } catch (err) {
       log.error(err);
       return next();
