@@ -26,7 +26,9 @@ export function serve(
     const name = path.basename(req.url).substring(1); // foo.js from _foo.js
 
     try {
-      const result = await minify(path.join(pub, dir, `+${name}`));
+      const result = await minify(path.join(pub, dir, `+${name}`), {
+        js: {type: 'terser'},
+      });
       res.header('Content-type', 'text/javascript')
         .send(result);
       await fs.writeFile(path.join(pub, req.url), result);
