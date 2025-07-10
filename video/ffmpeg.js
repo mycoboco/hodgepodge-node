@@ -825,8 +825,8 @@ if (false) {
 
     try {
       init({
-        ffmpeg: '/Users/pooh/Project/var/ffmpeg/node_modules/ffmpeg-static',
-        ffprobe: '/Users/pooh/Project/var/ffprobe/node_modules/ffprobe-static/bin/darwin/x64',
+        ffmpeg: '/opt/homebrew/bin',
+        ffprobe: '/opt/homebrew/bin',
       }, null, childManager);
 
       console.log(await probe(test));
