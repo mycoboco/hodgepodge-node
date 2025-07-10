@@ -494,12 +494,13 @@ export async function preview(s, t, opt) {
       if (fps === 0) {
         fps = 1;
         if (opt.blank) {
-          blank = (s) =>
+          const _s = s;
+          blank = () =>
             drive(
               tmp,
               constructOpts(
                 [
-                  '-i', s,
+                  '-i', _s,
                   '-f', 'lavfi',
                   '-i', `color=s=${info[0].width}x${info[0].height}:` +
                     `d=${Math.ceil(number / info[0].fps)}`,
@@ -849,6 +850,13 @@ if (false) {
       console.log(await thumbnail(test, 'sample.jpg', {thumbnails: [1, 4]}));
       console.log(await preview(test, 'sample-prv.jpg', {number: 10}));
       console.log(await preview(test, 'sample-trim-prv.jpg', {number: 10, trims: [0, 3]}));
+      console.log(
+        await preview(test, 'sample-blank-prv.jpg', {
+          number: 20,
+          trims: [0, 0.5],
+          blank: true,
+        }),
+      );
       console.log(
         await watermark(test, water, 'sample-wm.mp4', {margins: [10, 10]},
           (p) => console.log(`watermark: ${p}`)),
