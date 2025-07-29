@@ -50,7 +50,8 @@ export async function frame(p, trims) {
         }
         let nframe = /frame=\s*([0-9]+)/;
         nframe = nframe.exec(stderr);
-        if (nframe) nframe = +nframe[1];
+        if (!nframe) return reject(new Error('frame # does not exist'));
+        nframe = +nframe[1];
         resolve(nframe);
       })
       .on('error', reject)
