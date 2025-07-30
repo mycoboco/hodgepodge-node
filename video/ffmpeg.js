@@ -472,7 +472,7 @@ export async function thumbnail(s, t, opt) {
 }
 
 export async function preview(s, t, opt) {
-  const accepts = ['trims', 'number', 'fps', 'height', 'quality', 'blank'];
+  const accepts = ['trims', 'number', 'fps', 'height', 'quality', 'blank', 'estimate'];
 
   if (Array.isArray(s)) [s] = s;
 
@@ -501,6 +501,8 @@ export async function preview(s, t, opt) {
               tmp,
               constructOpts(
                 [
+                  ...(trims?.[0] >= 0 ? ['-ss', trims[0]] : []),
+                  ...(trims?.[1] > 0 ? ['-t', trims[1] - trims[0]] : []),
                   '-i', _s,
                   '-f', 'lavfi',
                   '-i', `color=s=${info[0].width}x${info[0].height}:` +
@@ -546,7 +548,16 @@ export async function preview(s, t, opt) {
   };
 
   if (typeof number === 'number' && (trims?.[0] >= 0 || trims?.[1] > 0)) {
-    const f = await frame(s, trims); // counts # of frames of trimmed one
+    let f;
+    try {
+      f = await frame(s, trims); // counts # of frames of trimmed one
+    } catch (err) {
+      if (!opt.estimate) throw err;
+      f = Math.ceil(
+        ((trims?.[1] > 0 ? trims[1] : info[0].duration) - (trims?.[0] >= 0 ? trims[0] : 0)) *
+          info[0].fps,
+      );
+    }
     return perform(f);
   } else {
     return perform(info[0].nframe);
@@ -856,6 +867,7 @@ if (false) {
           number: 20,
           trims: [0, 0.5],
           blank: true,
+          estimate: true,
         }),
       );
       console.log(
