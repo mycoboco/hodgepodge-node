@@ -861,7 +861,13 @@ if (false) {
       );
       console.log(await thumbnail(test, 'sample.jpg', {thumbnails: [1, 4]}));
       console.log(await preview(test, 'sample-prv.jpg', {number: 10}));
-      console.log(await preview(test, 'sample-trim-prv.jpg', {number: 10, trims: [0, 3]}));
+      console.log(
+        await preview(test, 'sample-trim-prv.jpg', {
+          number: 10,
+          trims: [0, 3],
+          estimate: true,
+        }),
+      );
       console.log(
         await preview(test, 'sample-blank-prv.jpg', {
           number: 20,
