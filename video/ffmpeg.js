@@ -867,7 +867,7 @@ if (false) {
         await blur(test, 'sample-blur.mp4', {crf: 35}, (p) => console.log(`blur: ${p}`)),
       );
       console.log(
-        await landscape('sample-copy.mp4', 'sample-landscape.mp4', {},
+        await landscape('sample-comp.mp4', 'sample-landscape.mp4', {},
           (p) => console.log(`landscape: ${p}`)),
       );
       console.log(
