@@ -478,7 +478,7 @@ export async function preview(s, t, opt) {
 
   const tmp = path.join(os.tmpdir(), `${path.basename(t)}-tmp.mp4`);
   temps.push(tmp);
-  const height = opt.height ?? 120;
+  const {height = 120, trims} = opt;
   let number;
   let fps;
   if (typeof opt.fps === 'number') ({fps} = opt);
@@ -522,10 +522,10 @@ export async function preview(s, t, opt) {
       ]);
     } else {
       nframe = Math.min(
-        opt.trims?.[1] > 0 ? opt.trims[1] : info[0].duration,
+        trims?.[1] > 0 ? trims[1] : info[0].duration,
         info[0].duration,
       );
-      if (opt.trims?.[0] >= 0) nframe -= opt.trims[0];
+      if (trims?.[0] >= 0) nframe -= trims[0];
       number = Math.max(1, Math.floor(nframe / fps));
       opts = constructOpts(['-i', s], opt, accepts, [
         '-frames', '1',
@@ -545,8 +545,8 @@ export async function preview(s, t, opt) {
       });
   };
 
-  if (typeof number === 'number' && (opt.trims?.[0] >= 0 || opt.trims?.[1] > 0)) {
-    const f = await frame(s, opt.trims); // counts # of frames of trimmed one
+  if (typeof number === 'number' && (trims?.[0] >= 0 || trims?.[1] > 0)) {
+    const f = await frame(s, trims); // counts # of frames of trimmed one
     return perform(f);
   } else {
     return perform(info[0].nframe);
