@@ -136,8 +136,12 @@ export async function probe(ps) {
 
             // nframe required for videos
             if ((mime.getType(p) || '').indexOf('video/') === 0 && !isFinite(info.nframe)) {
-              const f = await frame(p);
-              info.nframe = f;
+              try {
+                const f = await frame(p);
+                info.nframe = f;
+              } catch (err) {
+                return reject(err);
+              }
             }
 
             resolve();
