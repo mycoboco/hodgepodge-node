@@ -113,7 +113,7 @@ export async function probe(ps) {
             const bitrate = /bitrate: ([0-9]+) kb\/s/.exec(stderr);
             if (bitrate) info.bitrate = +bitrate[1];
 
-            const date = /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+\d+))/
+            const date = /date\s*:\s*(\d{4}-\d{2}-\d{2}[T| ]\d{2}:\d{2}:\d{2}(?:\+[:\d]+))/
               .exec(stderr);
             if (date) {
               info.recordedAt = new Date(date[1]);
